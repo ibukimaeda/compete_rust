@@ -1,7 +1,11 @@
 *
 
+!.vscode/*
+!src/*
+!mysnnipet/*
+
 !.gitignore
 !Cargo.toml
 !compete.toml
-!src/*
-!mysnnipet/*
+!snippet.sh
+!README.md
