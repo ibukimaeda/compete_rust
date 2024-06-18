@@ -1,11 +1,5 @@
-*
+target/
 
-!.vscode/*
-!src/*
-!mysnnipet/*
 
-!.gitignore
-!Cargo.toml
-!compete.toml
-!snippet.sh
-!README.md
+# contest
+abc300/*
