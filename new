@@ -9,9 +9,11 @@ fi
 # 引数の処理
 case $1 in
   c)
+    cd contest
     cargo compete new $2
-    cargo member include $2
-    cd $2
+    cd ..
+    cargo member include contest/$2
+    cd contest/$2
     ;;
   vc)
     cd virtual_contest

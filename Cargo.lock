@@ -3,74 +3,6 @@
 version = 3
 
 [[package]]
-name = "abc201"
-version = "0.1.0"
-dependencies = [
- "ac-library-rs",
- "alga",
- "amplify",
- "amplify_derive",
- "amplify_num",
- "argio",
- "ascii",
- "az",
- "bitset-fixed",
- "bitvec",
- "bstr",
- "btreemultimap",
- "counter",
- "easy-ext",
- "either",
- "fixedbitset",
- "getrandom",
- "glidesort",
- "hashbag",
- "im-rc",
- "indexing",
- "indexmap 2.0.0",
- "itertools",
- "itertools-num",
- "lazy_static",
- "libm",
- "maplit",
- "memoise",
- "multimap",
- "multiversion",
- "nalgebra",
- "ndarray",
- "num",
- "num-bigint",
- "num-complex 0.4.3",
- "num-derive",
- "num-integer",
- "num-iter",
- "num-rational",
- "num-traits",
- "omniswap",
- "once_cell",
- "ordered-float 3.7.0",
- "pathfinding",
- "permutohedron",
- "petgraph",
- "proconio",
- "rand",
- "rand_chacha",
- "rand_core",
- "rand_distr",
- "rand_hc",
- "rand_pcg",
- "recur-fn",
- "regex",
- "rustc-hash",
- "smallvec",
- "static_assertions",
- "superslice",
- "tap",
- "text_io",
- "varisat",
-]
-
-[[package]]
 name = "ac-library-rs"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -200,6 +132,70 @@ checksum = "d92bec98840b8f03a5ff5413de5293bfcd8bf96467cf5452609f939ec6f5de16"
 [[package]]
 name = "atcoder"
 version = "0.1.0"
+dependencies = [
+ "ac-library-rs",
+ "alga",
+ "amplify",
+ "amplify_derive",
+ "amplify_num",
+ "argio",
+ "ascii",
+ "az",
+ "bitset-fixed",
+ "bitvec",
+ "bstr",
+ "btreemultimap",
+ "counter",
+ "easy-ext",
+ "either",
+ "fixedbitset",
+ "getrandom",
+ "glidesort",
+ "hashbag",
+ "im-rc",
+ "indexing",
+ "indexmap 2.0.0",
+ "itertools",
+ "itertools-num",
+ "lazy_static",
+ "libm",
+ "maplit",
+ "memoise",
+ "multimap",
+ "multiversion",
+ "nalgebra",
+ "ndarray",
+ "num",
+ "num-bigint",
+ "num-complex 0.4.3",
+ "num-derive",
+ "num-integer",
+ "num-iter",
+ "num-rational",
+ "num-traits",
+ "omniswap",
+ "once_cell",
+ "ordered-float 3.7.0",
+ "pathfinding",
+ "permutohedron",
+ "petgraph",
+ "proconio",
+ "rand",
+ "rand_chacha",
+ "rand_core",
+ "rand_distr",
+ "rand_hc",
+ "rand_pcg",
+ "recur-fn",
+ "regex",
+ "rustc-hash",
+ "smallvec",
+ "static_assertions",
+ "superslice",
+ "tap",
+ "text_io",
+ "varisat",
+]
 
 [[package]]
 name = "autocfg"
@@ -268,9 +264,9 @@ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
 
 [[package]]
 name = "bytemuck"
-version = "1.16.0"
+version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78834c15cb5d5efe3452d58b1e8ba890dd62d21907f867f383358198e56ebca5"
+checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
 
 [[package]]
 name = "cargo-snippet"
@@ -478,74 +474,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "maximum-cup-2018"
-version = "0.1.0"
-dependencies = [
- "ac-library-rs",
- "alga",
- "amplify",
- "amplify_derive",
- "amplify_num",
- "argio",
- "ascii",
- "az",
- "bitset-fixed",
- "bitvec",
- "bstr",
- "btreemultimap",
- "counter",
- "easy-ext",
- "either",
- "fixedbitset",
- "getrandom",
- "glidesort",
- "hashbag",
- "im-rc",
- "indexing",
- "indexmap 2.0.0",
- "itertools",
- "itertools-num",
- "lazy_static",
- "libm",
- "maplit",
- "memoise",
- "multimap",
- "multiversion",
- "nalgebra",
- "ndarray",
- "num",
- "num-bigint",
- "num-complex 0.4.3",
- "num-derive",
- "num-integer",
- "num-iter",
- "num-rational",
- "num-traits",
- "omniswap",
- "once_cell",
- "ordered-float 3.7.0",
- "pathfinding",
- "permutohedron",
- "petgraph",
- "proconio",
- "rand",
- "rand_chacha",
- "rand_core",
- "rand_distr",
- "rand_hc",
- "rand_pcg",
- "recur-fn",
- "regex",
- "rustc-hash",
- "smallvec",
- "static_assertions",
- "superslice",
- "tap",
- "text_io",
- "varisat",
-]
-
-[[package]]
 name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -618,13 +546,13 @@ dependencies = [
 
 [[package]]
 name = "nalgebra-macros"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91761aed67d03ad966ef783ae962ef9bbaca728d2dd7ceb7939ec110fffad998"
+checksum = "254a5372af8fc138e36684761d3c0cdb758a4410e938babcff1c860ce14ddbfc"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.68",
 ]
 
 [[package]]
@@ -692,7 +620,7 @@ checksum = "9e6a0fd4f737c707bd9086cc16c925f294943eb62eb71499e9fd4cf71f8b9f4e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.66",
+ "syn 2.0.68",
 ]
 
 [[package]]
@@ -832,9 +760,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.85"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
+checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
 dependencies = [
  "unicode-ident",
 ]
@@ -1014,7 +942,7 @@ checksum = "500cbc0ebeb6f46627f50f3f5811ccf6bf00643be300b4c3eabc0ef55dc5b5ba"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.66",
+ "syn 2.0.68",
 ]
 
 [[package]]
@@ -1084,9 +1012,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.66"
+version = "2.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c42f3f41a2de00b01c0aaad383c5a45241efc8b2d1eda5661812fda5f3cdcff5"
+checksum = "901fa70d88b9d6c98022e23b4136f9f3e54e4662c3bc1bd1d84a42a9a0f0c1e9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1140,7 +1068,7 @@ checksum = "46c3384250002a6d5af4d114f2845d37b57521033f30d5c3f46c4d70e1197533"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.66",
+ "syn 2.0.68",
 ]
 
 [[package]]
@@ -1281,7 +1209,7 @@ dependencies = [
  "once_cell",
  "proc-macro2",
  "quote",
- "syn 2.0.66",
+ "syn 2.0.68",
  "wasm-bindgen-shared",
 ]
 
@@ -1303,7 +1231,7 @@ checksum = "e94f17b526d0a461a191c78ea52bbce64071ed5c04c9ffe424dcb38f74171bb7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.66",
+ "syn 2.0.68",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
