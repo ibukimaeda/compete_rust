@@ -31,12 +31,12 @@ fn main() {}
 
 #[allow(dead_code)]
 fn yes() {
-    println!("YES");
+    println!("Yes");
 }
 
 #[allow(dead_code)]
 fn no() {
-    println!("NO");
+    println!("No");
 }
 
 #[allow(dead_code)]

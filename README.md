@@ -3,6 +3,7 @@
 - [Atcoder コンテスト一覧](https://atcoder.jp/contests)
 - [AtCoder 版！蟻本 (初級編)](https://qiita.com/drken/items/e77685614f3c6bf86f44)
 - [AtCoder Problems](https://kenkoooo.com/atcoder/#/table/)
+- [競プロ典型 90 問](https://atcoder.jp/contests/typical90)
 
 ## 参考
 
