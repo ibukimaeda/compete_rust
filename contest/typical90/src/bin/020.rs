@@ -27,7 +27,15 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(a:i64, b:i64, c:i64);
+
+    if a < c.pow(b as u32) {
+        yes();
+    } else {
+        no();
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +707,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-

@@ -27,7 +27,23 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(A:u64, B:u64,C:u64);
+
+    let g = gcd_list(&[A, B, C]);
+    say(A / g + B / g + C / g - 3);
+}
+
+fn gcd(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+}
+fn gcd_list(list: &[u64]) -> u64 {
+    list.iter().fold(list[0], |a, &b| gcd(a, b))
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +715,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-

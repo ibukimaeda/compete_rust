@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use alga::general::ComplexField;
 use itertools::Itertools;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
-use std::cmp;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
@@ -14,6 +14,7 @@ use std::fmt;
 use std::mem;
 use std::ops;
 use std::vec;
+use std::{cmp, f64::consts::PI, pin};
 
 #[allow(dead_code)]
 // const MOD: i64 = 1_000_000_007;
@@ -27,7 +28,18 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(T: f64, L: f64, X: f64, Y: f64, Q: usize, E: [f64; Q]);
+
+    for e in E {
+        let y = -L / 2.0 * (e / T * 2.0 * PI).sin();
+        let z = -L / 2.0 * (e / T * 2.0 * PI).cos() + L / 2.0;
+        let b = (X.powf(2.0) + (Y - y).powf(2.0)).sqrt();
+        let c = (X.powf(2.0) + (Y - y).powf(2.0) + z.powf(2.0)).sqrt();
+        let ans = (b / c).acos() * 180.0 / PI;
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +711,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-

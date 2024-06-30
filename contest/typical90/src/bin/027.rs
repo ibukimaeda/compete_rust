@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use maplit::hashset;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
@@ -27,7 +28,23 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S:[String; N]);
+
+    let mut ans = vec![];
+    let mut names = HashSet::new();
+    for (i, s) in S.iter().enumerate() {
+        if names.contains(s) {
+            continue;
+        }
+        names.insert(s.clone());
+        ans.push(i + 1);
+    }
+
+    for i in 0..ans.len() {
+        println!("{}", ans[i]);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +716,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-

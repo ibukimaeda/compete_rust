@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use im_rc::{hashmap, hashset};
 use itertools::Itertools;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
-use std::cmp;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
@@ -14,6 +14,7 @@ use std::fmt;
 use std::mem;
 use std::ops;
 use std::vec;
+use std::{cmp, hash::Hash};
 
 #[allow(dead_code)]
 // const MOD: i64 = 1_000_000_007;
@@ -27,7 +28,50 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, AB:[(Usize1, Usize1);N-1]);
+
+    let mut graph = vec![vec![]; N];
+    for (a, b) in AB {
+        graph[a].push(b);
+        graph[b].push(a);
+    }
+
+    let mut ans = HashSet::new();
+    let mut seen = vec![false; N];
+    seen[0] = true;
+    let mut st = vec![(0, 0)];
+
+    while let Some((now, depth)) = st.pop() {
+        if depth % 2 == 0 {
+            ans.insert(now + 1);
+        }
+
+        for &next in &graph[now] {
+            if seen[next] {
+                continue;
+            }
+            seen[next] = true;
+            st.push((next, depth + 1));
+        }
+    }
+
+    if ans.len() < N / 2 {
+        let _ans: HashSet<usize> = (1..=N).into_iter().collect();
+        ans = _ans.difference(&ans).map(|x| *x).collect();
+    }
+
+    let mut ans = ans.into_iter().collect::<Vec<_>>();
+    ans.sort();
+
+    for i in 0..N / 2 {
+        if i == 0 {
+            print!("{}", ans[i]);
+        } else {
+            print!(" {}", ans[i]);
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +743,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-

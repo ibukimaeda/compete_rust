@@ -27,7 +27,22 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:i64, A:[i64;N], B:[i64;N]);
+
+    let mut count = 0;
+    for i in 0..N {
+        count += (A[i] - B[i]).abs();
+    }
+
+    debug!(count, K);
+
+    if count <= K && (K - count) % 2 == 0 {
+        yes();
+    } else {
+        no();
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -699,4 +714,3 @@ fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T)
     }
     return ret;
 }
-
