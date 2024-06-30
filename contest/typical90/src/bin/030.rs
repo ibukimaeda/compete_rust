@@ -27,7 +27,42 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize);
+
+    let mut is_prime = vec![true; N + 1];
+    is_prime[0] = false;
+    is_prime[1];
+    for i in 2..=N {
+        if is_prime[i] {
+            let mut factor = 2;
+            loop {
+                if i * factor > N {
+                    break;
+                }
+
+                is_prime[i * factor] = false;
+                factor += 1;
+            }
+        }
+    }
+
+    let mut factors = vec![0; N + 1];
+    for i in 2..=N {
+        if !is_prime[i] {
+            continue;
+        }
+
+        let mut c = 1;
+        while i * c <= N {
+            factors[i * c] += 1;
+            c += 1;
+        }
+    }
+
+    let ans = factors.iter().filter(|&&x| x >= K).count();
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +397,3 @@ where
         r.clone()
     }
 }
-
