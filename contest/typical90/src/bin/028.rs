@@ -27,45 +27,7 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {
-    input!(N:usize, lr: [(usize, usize, usize, usize); N]);
-
-    let size = 30;
-
-    let mut table = nested_vec!(0; size; size);
-
-    for &(lx, ly, rx, ry) in &lr {
-        table[lx][ly] += 1;
-        table[lx][ry] -= 1;
-        table[rx][ry] += 1;
-        table[rx][ly] -= 1;
-    }
-
-    // 横方向の累積和
-    for i in 0..size {
-        for j in 1..size {
-            table[i][j] += table[i][j - 1];
-        }
-    }
-
-    // 縦方向の累積和
-    for i in 1..size {
-        for j in 0..size {
-            table[i][j] += table[i - 1][j];
-        }
-    }
-
-    let mut ans = vec![0; N + 1];
-    for i in 0..size {
-        for j in 0..size {
-            ans[table[i][j] as usize] += 1;
-        }
-    }
-
-    for i in 1..=N {
-        say(ans[i]);
-    }
-}
+fn main() {}
 
 #[allow(dead_code)]
 fn yes() {
@@ -400,3 +362,4 @@ where
         r.clone()
     }
 }
+
