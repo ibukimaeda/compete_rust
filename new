@@ -3,7 +3,7 @@
 # 引数の数をチェック
 if [ $# -ne 2 ]; then
   echo "Usage: $0 {c|vc} <project_name>"
-  exit 1
+  return 1 2>/dev/null || exit 1
 fi
 
 # 引数の処理
