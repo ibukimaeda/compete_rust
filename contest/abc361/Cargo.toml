@@ -1,10 +1,44 @@
-workspace = { members = ["mysnippet", "contest/typical90", "contest/abc360", "contest/abc361"], exclude = [] }
 [package]
-name = "atcoder"
+name = "abc361"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.cargo-compete.bin]
+abc361-a = { alias = "a", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_a" }
+abc361-b = { alias = "b", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_b" }
+abc361-c = { alias = "c", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_c" }
+abc361-d = { alias = "d", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_d" }
+abc361-e = { alias = "e", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_e" }
+abc361-f = { alias = "f", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_f" }
+abc361-g = { alias = "g", problem = "https://atcoder.jp/contests/abc361/tasks/abc361_g" }
+
+[[bin]]
+name = "abc361-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "abc361-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "abc361-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "abc361-d"
+path = "src/bin/d.rs"
+
+[[bin]]
+name = "abc361-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "abc361-f"
+path = "src/bin/f.rs"
+
+[[bin]]
+name = "abc361-g"
+path = "src/bin/g.rs"
 
 [dependencies]
 # 202301から:
@@ -20,11 +54,7 @@ hashbag = "=0.1.11"
 pathfinding = "=4.3.0"
 recur-fn = "=2.2.0"
 indexing = { version = "=0.4.1", features = ["experimental_pointer_ranges"] }
-amplify = { version = "=3.14.2", features = [
-    "c_raw",
-    "rand",
-    "stringly_conversions",
-] }
+amplify = { version = "=3.14.2", features = ["c_raw", "rand", "stringly_conversions"] }
 amplify_derive = "=2.11.3"
 amplify_num = { version = "=0.4.1", features = ["std"] }
 easy-ext = "=1.0.1"
@@ -74,13 +104,6 @@ bitset-fixed = "=0.1.0"
 proconio = { version = "=0.4.5", features = ["derive"] }
 text_io = "=0.1.12"
 rustc-hash = "=1.1.0"
-smallvec = { version = "=1.11.0", features = [
-    "const_generics",
-    "const_new",
-    "write",
-    "union",
-    "serde",
-    "arbitrary",
-] }
+smallvec = { version = "=1.11.0", features = ["const_generics", "const_new", "write", "union", "serde", "arbitrary"] }
 
 [dev-dependencies]

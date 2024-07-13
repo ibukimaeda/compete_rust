@@ -25,6 +25,6 @@ case $1 in
   *)
     echo "Invalid option: $1"
     echo "Usage: $0 {c|vc} <project_name>"
-    exit 1
+    exit
     ;;
 esac
