@@ -3,7 +3,7 @@
 # 引数の数をチェック
 if [ $# -ne 2 ]; then
   echo "Usage: $0 {c|vc} <project_name>"
-  return 1 2>/dev/null || exit 1
+  exit 1
 fi
 
 # 引数の処理
@@ -28,3 +28,7 @@ case $1 in
     exit
     ;;
 esac
+
+git add .
+git commit -m "Add $2"
+git push origin main

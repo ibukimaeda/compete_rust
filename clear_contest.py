@@ -12,3 +12,7 @@ for member in members:
         continue
 
     subprocess.run(["cargo", "member", "rm", member])
+
+subprocess.run(["git", "add", "."])
+subprocess.run(["git", "commit", "-m", "clear contest"])
+subprocess.run(["git", "push", "origin", "main"])
