@@ -22,6 +22,12 @@ cases:
       abcwxyzyxw
     out: |
       440640
+  - name: sample4
+    in: |
+      10 5
+      1234567890
+    out: |
+      440640
 
 extend:
   - type: Text

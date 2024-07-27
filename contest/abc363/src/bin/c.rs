@@ -26,8 +26,70 @@ const INF: i64 = 1_010_000_000_000_000_017;
 const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+fn permute(
+    chars: &mut Vec<char>,
+    l: usize,
+    r: usize,
+    k: usize,
+    permutations: &mut HashSet<String>,
+) {
+    if l >= k {
+        // debug!(l >= k);
+        let mut is_kaibun = true;
+        for i in 0..k {
+            let pleft = (l - k) + i;
+            let pright = (l - 1) - i;
+            // debug!(pleft, pright);
+            if chars[pleft] != chars[pright] {
+                is_kaibun = false;
+                break;
+            }
+        }
+
+        if is_kaibun {
+            return;
+        }
+    }
+
+    if l + 1 == r {
+        debug!(l + 1 == r);
+        let mut is_kaibun = true;
+        for i in 0..k {
+            let left = (r - k) + i;
+            let right = (r - 1) - i;
+            debug!(left, right);
+            if chars[(r - 1 - k) + i] != chars[(r - 1) - i] {
+                is_kaibun = false;
+                break;
+            }
+        }
+
+        if is_kaibun {
+            return;
+        }
+        permutations.insert(chars.iter().collect());
+    } else {
+        for i in l..r {
+            chars.swap(l, i);
+            permute(chars, l + 1, r, k, permutations);
+            chars.swap(l, i);
+        }
+    }
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, mut S:Chars);
+
+    let mut permutations: HashSet<String> = HashSet::new();
+
+    let s_len = S.len();
+    permute(&mut S, 0, s_len, K, &mut permutations);
+
+    debug!(permutations);
+
+    say(permutations.len());
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +424,3 @@ where
         r.clone()
     }
 }
-

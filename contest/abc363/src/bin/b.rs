@@ -27,7 +27,23 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, T:usize, P:usize, L:[usize; N]);
+
+    for i in 0..=100 {
+        let mut sum = 0;
+        for j in 0..N {
+            if L[j] + i >= T {
+                sum += 1;
+            }
+        }
+
+        if sum >= P {
+            say(i);
+            return;
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +378,3 @@ where
         r.clone()
     }
 }
-
