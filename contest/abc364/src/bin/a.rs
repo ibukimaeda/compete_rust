@@ -27,7 +27,27 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input! {N:usize, S:[String; N]};
+
+    if N <= 2 {
+        println!("Yes");
+        return;
+    }
+
+    let mut can_eat = true;
+    for i in 0..N - 2 {
+        if S[i] == S[i + 1] && S[i] == "sweet".to_string() {
+            can_eat = false;
+        }
+    }
+
+    if can_eat {
+        println!("Yes");
+    } else {
+        println!("No");
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +382,3 @@ where
         r.clone()
     }
 }
-

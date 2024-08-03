@@ -27,7 +27,39 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[[i64; N];N], M:usize, XY:[(Usize1, Usize1);M]);
+
+    let mut is_bad = vec![vec![false; N]; N];
+    for (x, y) in XY {
+        is_bad[x][y] = true;
+        is_bad[y][x] = true;
+    }
+
+    let mut ans = INF;
+    'a: for perm in (0..N).permutations(N) {
+        debug!(perm);
+        for i in 0..N - 1 {
+            if is_bad[perm[i]][perm[i + 1]] {
+                continue 'a;
+            }
+        }
+
+        let mut cost = 0;
+        for i in 0..N {
+            cost += A[perm[i]][i];
+        }
+        chmin!(ans, cost);
+    }
+
+    debug!(ans);
+
+    if ans == INF {
+        say(-1);
+    } else {
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +394,3 @@ where
         r.clone()
     }
 }
-

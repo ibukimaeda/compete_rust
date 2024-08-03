@@ -27,7 +27,41 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, a:[i64; N]);
+
+    let mut ans = 0;
+    let mut count = HashMap::new();
+
+    let mut l = 0;
+    let mut r = 0;
+    while l < N {
+        while r < N {
+            let is_in = count.contains_key(&a[r]);
+            if is_in && count.len() <= K {
+                *count.entry(a[r]).or_insert(0) += 1;
+                r += 1;
+            } else if !is_in && count.len() < K {
+                *count.entry(a[r]).or_insert(0) += 1;
+                r += 1;
+            } else {
+                break;
+            }
+        }
+
+        chmax!(ans, r - l);
+
+        if *count.get(&a[l]).unwrap() > 1 {
+            *count.get_mut(&a[l]).unwrap() -= 1;
+        } else {
+            count.remove(&a[l]);
+        }
+
+        l += 1;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +396,3 @@ where
         r.clone()
     }
 }
-

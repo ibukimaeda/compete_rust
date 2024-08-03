@@ -27,7 +27,44 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, X:i128, Y:i128, mut A:[i128; N], mut B:[i128; N]);
+
+    A.sort_unstable_by(|a, b| b.cmp(a));
+    B.sort_unstable_by(|a, b| b.cmp(a));
+
+    debug!(A);
+    debug!(B);
+
+    let mut ai = !0;
+    let mut a_sum = 0;
+    for i in 0..N {
+        a_sum += A[i];
+        debug!(i, a_sum);
+
+        if a_sum > X {
+            ai = i;
+            break;
+        }
+    }
+
+    let mut bi = !0;
+    let mut b_sum = 0;
+    for i in 0..N {
+        b_sum += B[i];
+
+        if b_sum > Y {
+            bi = i;
+            break;
+        }
+    }
+
+    if min!(ai, bi) == !0 {
+        say(N);
+    } else {
+        say(min!(ai, bi) + 1);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +399,3 @@ where
         r.clone()
     }
 }
-

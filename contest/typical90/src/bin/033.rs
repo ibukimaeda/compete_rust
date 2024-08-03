@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use alga::general::ComplexField;
 use itertools::Itertools;
 use proconio::{
     fastout, input, input_interactive,
@@ -27,7 +28,15 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(H:f64, W:f64);
+
+    if H == 1.0 || W == 1.0 {
+        say((H * W) as i64);
+        return;
+    }
+    say((H / 2.0).ceil() * (W / 2.0).ceil());
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +371,3 @@ where
         r.clone()
     }
 }
-

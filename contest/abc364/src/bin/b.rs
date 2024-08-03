@@ -27,7 +27,50 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(H:usize, W:usize, S:(Usize1, Usize1), C:[Chars; H], X:Chars);
+
+    let mut now = S;
+    for x in X {
+        if x == 'L' {
+            if is_in(now, 0, -1, H, W) && C[now.0][now.1 - 1] != '#' {
+                now = updated_coordinate(now.0, now.1, 0, -1);
+            }
+        }
+
+        if x == 'R' {
+            if is_in(now, 0, 1, H, W) && C[now.0][now.1 + 1] != '#' {
+                now = updated_coordinate(now.0, now.1, 0, 1);
+            }
+        }
+
+        if x == 'U' {
+            if is_in(now, -1, 0, H, W) && C[now.0 - 1][now.1] != '#' {
+                now = updated_coordinate(now.0, now.1, -1, 0);
+            }
+        }
+
+        if x == 'D' {
+            if is_in(now, 1, 0, H, W) && C[now.0 + 1][now.1] != '#' {
+                now = updated_coordinate(now.0, now.1, 1, 0);
+            }
+        }
+    }
+
+    println!("{} {}", now.0 + 1, now.1 + 1);
+}
+
+fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
+    let H = H as i64;
+    let W = W as i64;
+    let new_x = now.0 as i64 + dx;
+    let new_y = now.1 as i64 + dy;
+    return 0 <= new_x && new_x < H && 0 <= new_y && new_y < W;
+}
+
+fn updated_coordinate(x: usize, y: usize, dx: i64, dy: i64) -> (usize, usize) {
+    return ((x as i64 + dx) as usize, (y as i64 + dy) as usize);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +405,3 @@ where
         r.clone()
     }
 }
-
