@@ -27,7 +27,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, X:Usize1, Y:Usize1);
+
+    let mut ans = vec![0; N];
+
+    for i in 0..N {
+        for j in i + 1..N {
+            let d = min!(
+                j as i64 - i as i64,
+                (X as i64 - i as i64).abs() + 1 + (Y as i64 - j as i64).abs()
+            );
+            ans[d as usize] += 1;
+        }
+    }
+
+    for i in 1..N {
+        say(ans[i]);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +380,3 @@ where
         r.clone()
     }
 }
-
