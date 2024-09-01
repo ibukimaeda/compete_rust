@@ -40,3 +40,5 @@ esac
 git add .
 git commit -m "Add $project_name"
 git push origin main
+
+cargo build
