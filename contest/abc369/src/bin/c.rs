@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use bitvec::view;
 use itertools::Itertools;
 use proconio::{
     fastout, input, input_interactive,
@@ -27,7 +28,29 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[i64;N]);
+
+    let mut diff = vec![];
+    for i in 1..N {
+        diff.push(A[i] - A[i - 1]);
+    }
+
+    debug!(diff);
+
+    let mut right = 0;
+    let mut ans = 0;
+    for left in 0..diff.len() {
+        while right < diff.len() && diff[right] == diff[left] {
+            right += 1;
+        }
+
+        let len = right as i64 - left as i64;
+        ans += len;
+    }
+
+    say(ans + N as i64);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +385,3 @@ where
         r.clone()
     }
 }
-

@@ -27,7 +27,24 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(mut A:i64,mut  B:i64);
+
+    if A > B {
+        (A, B) = (B, A);
+    }
+
+    if A == B {
+        say(1);
+        return;
+    }
+
+    if (A + B) % 2 == 0 {
+        say(3);
+    } else {
+        say(2);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +379,3 @@ where
         r.clone()
     }
 }
-

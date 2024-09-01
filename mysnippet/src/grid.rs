@@ -1,6 +1,7 @@
 use cargo_snippet::snippet;
 
-#[snippet(":is_in")]
+#[snippet(":updated_coordinate")]
+#[allow(non_snake_case)]
 fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
     let H = H as i64;
     let W = W as i64;
@@ -26,19 +27,32 @@ fn test_is_in() {
 }
 
 #[snippet(":updated_coordinate")]
-fn updated_coordinate(x: usize, y: usize, dx: i64, dy: i64) -> (usize, usize) {
-    return ((x as i64 + dx) as usize, (y as i64 + dy) as usize);
+#[allow(non_snake_case)]
+fn updated_coordinate(
+    x: usize,
+    y: usize,
+    dx: i64,
+    dy: i64,
+    H: usize,
+    W: usize,
+) -> Option<(usize, usize)> {
+    if is_in((x, y), dx, dy, H, W) {
+        return Some(((x as i64 + dx) as usize, (y as i64 + dy) as usize));
+    } else {
+        return None;
+    }
 }
 
 #[test]
 fn test_updated_coordinate() {
-    assert_eq!(updated_coordinate(0, 0, 0, 0), (0, 0));
-    assert_eq!(updated_coordinate(0, 0, 0, 1), (0, 1));
-    assert_eq!(updated_coordinate(0, 0, 1, 0), (1, 0));
-    assert_eq!(updated_coordinate(0, 0, 1, 1), (1, 1));
-    assert_eq!(updated_coordinate(0, 0, -1, 0), (usize::MAX, 0));
-    assert_eq!(updated_coordinate(0, 0, 0, -1), (0, usize::MAX));
-    assert_eq!(updated_coordinate(0, 0, -1, -1), (usize::MAX, usize::MAX));
+    assert_eq!(updated_coordinate(0, 0, 0, 0, 3, 3), Some((0, 0)));
+    assert_eq!(updated_coordinate(0, 0, 0, 1, 3, 3), Some((0, 1)));
+    assert_eq!(updated_coordinate(0, 0, 1, 0, 3, 3), Some((1, 0)));
+    assert_eq!(updated_coordinate(0, 0, 1, 1, 3, 3), Some((1, 1)));
+    assert_eq!(updated_coordinate(0, 0, -1, 0, 3, 3), None);
+    assert_eq!(updated_coordinate(0, 0, 0, -1, 3, 3), None);
+    assert_eq!(updated_coordinate(0, 0, -1, -1, 3, 3), None);
+    assert_eq!(updated_coordinate(0, 0, 1, -1, 3, 3), None);
 }
 
 #[snippet(":rotated")]

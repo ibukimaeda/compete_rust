@@ -27,7 +27,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[i64; N]);
+
+    let mut dp = nested_vec!(0; N+1; 2);
+
+    for (i, exp) in A.into_iter().enumerate() {
+        if i == 0 {
+            dp[1][0] = 0;
+            dp[1][1] = exp;
+        } else {
+            dp[i + 1][0] = max!(dp[i][0], dp[i][1] + 2 * exp);
+            dp[i + 1][1] = max!(dp[i][1], dp[i][0] + exp);
+        }
+    }
+
+    debug_vec2!(dp);
+
+    say(max!(dp[N][0], dp[N][1]));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +380,3 @@ where
         r.clone()
     }
 }
-

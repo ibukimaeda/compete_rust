@@ -27,7 +27,32 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, AS: [(i64, char); N]);
+
+    let mut ans = 0;
+    let mut l = -1;
+    let mut r = -1;
+
+    for (a, s) in AS {
+        if s == 'L' {
+            if l == -1 {
+                l = a;
+            }
+
+            ans += (l - a).abs();
+            l = a;
+        } else {
+            if r == -1 {
+                r = a;
+            }
+
+            ans += (r - a).abs();
+            r = a;
+        }
+    }
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +387,3 @@ where
         r.clone()
     }
 }
-

@@ -1,6 +1,9 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use num::Integer;
+use num_integer::div_ceil;
+use num_integer::div_floor;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
@@ -23,11 +26,37 @@ const MOD: i64 = 998_244_353;
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
 
+#[allow(dead_code)]
 const DX: [i64; 4] = [0, 0, 1, -1];
+#[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, mut H:i64, mut AB:[(i64, i64);N]);
+
+    AB.sort_by_key(|x| Reverse(x.1));
+    let max_A = AB.iter().map(|x| x.0).max().unwrap();
+
+    let mut ans = 0;
+    for i in 0..N {
+        if H <= 0 {
+            break;
+        }
+        if AB[i].1 < max_A {
+            break;
+        }
+
+        H -= AB[i].1;
+        ans += 1;
+    }
+
+    if H > 0 {
+        ans += div_ceil(H, max_A);
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +391,3 @@ where
         r.clone()
     }
 }
-

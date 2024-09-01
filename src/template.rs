@@ -23,7 +23,9 @@ const MOD: i64 = 998_244_353;
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
 
+#[allow(dead_code)]
 const DX: [i64; 4] = [0, 0, 1, -1];
+#[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]

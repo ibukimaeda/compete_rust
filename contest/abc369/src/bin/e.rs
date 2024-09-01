@@ -26,8 +26,72 @@ const INF: i64 = 1_010_000_000_000_000_017;
 const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+fn floyd_warshall(graph: &mut Vec<Vec<i64>>) -> Vec<Vec<i64>> {
+    let mut dist = nested_vec!(0; graph.len(); graph.len());
+    for i in 0..graph.len() {
+        for j in 0..graph.len() {
+            dist[i][j] = graph[i][j];
+        }
+    }
+
+    let n = dist.len();
+    for k in 0..n {
+        for i in 0..n {
+            for j in 0..n {
+                dist[i][j] = min!(dist[i][j], dist[i][k] + dist[k][j]);
+            }
+        }
+    }
+
+    dist
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(N:usize, M:usize, UVT:[(Usize1, Usize1, i64); M], Q:usize);
+
+    let mut graph = nested_vec!(INF; N; N);
+    for &(u, v, t) in &UVT {
+        graph[u][v] = min!(graph[u][v], t);
+        graph[v][u] = min!(graph[v][u], t);
+    }
+    for i in 0..N {
+        graph[i][i] = 0;
+    }
+
+    debug_vec2!(graph);
+
+    let dist = floyd_warshall(&mut graph);
+
+    debug_vec2!(dist);
+
+    for _ in 0..Q {
+        input_interactive!(K:usize, B:[Usize1; K]);
+
+        let mut ans = INF;
+        for perm in (0..K).permutations(K) {
+            for is_switch in 0..(1 << K) {
+                let mut time = 0;
+                let mut now = 0;
+
+                for i in 0..K {
+                    let (u, v, t) = UVT[B[perm[i]]];
+
+                    let is_switch = (is_switch >> i) & 1;
+                    let (u, v) = if is_switch == 0 { (u, v) } else { (v, u) };
+
+                    time += dist[now][u] + t;
+                    now = v;
+                }
+
+                time += dist[now][N - 1];
+                ans = min!(ans, time);
+            }
+        }
+
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -362,4 +426,3 @@ where
         r.clone()
     }
 }
-
