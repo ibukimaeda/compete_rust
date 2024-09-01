@@ -13,6 +13,8 @@ for member in members:
 
     subprocess.run(["cargo", "member", "rm", member])
 
+subprocess.run(["cargo", "clean"])
+
 subprocess.run(["git", "add", "."])
 subprocess.run(["git", "commit", "-m", "clear contest"])
 subprocess.run(["git", "push", "origin", "main"])
