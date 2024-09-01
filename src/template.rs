@@ -1,11 +1,13 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
+
 use std::cmp;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};

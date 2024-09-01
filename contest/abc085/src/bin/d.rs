@@ -1,9 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
-use num::Integer;
-use num_integer::div_ceil;
-use num_integer::div_floor;
+use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
