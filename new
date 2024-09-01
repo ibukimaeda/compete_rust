@@ -1,34 +1,42 @@
 #!/bin/bash
 
 # 引数の数をチェック
-if [ $# -ne 2 ]; then
-  echo "Usage: $0 {c|vc} <project_name>"
+if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+  echo "Usage: $0 [c|vc] <project_name>"
   exit 1
 fi
 
 # 引数の処理
-case $1 in
+if [ $# -eq 1 ]; then
+  option="c"
+  project_name=$1
+else
+  option=$1
+  project_name=$2
+fi
+
+case $option in
   c)
     cd contest
-    cargo compete new $2
+    cargo compete new $project_name
     cd ..
-    cargo member include contest/$2
-    cd contest/$2
+    cargo member include contest/$project_name
+    cd contest/$project_name
     ;;
   vc)
     cd virtual_contest
-    cargo compete new $2
+    cargo compete new $project_name
     cd ..
-    cargo member include virtual_contest/$2
-    cd virtual_contest/$2
+    cargo member include virtual_contest/$project_name
+    cd virtual_contest/$project_name
     ;;
   *)
-    echo "Invalid option: $1"
-    echo "Usage: $0 {c|vc} <project_name>"
-    exit
+    echo "Invalid option: $option"
+    echo "Usage: $0 [c|vc] <project_name>"
+    exit 1
     ;;
 esac
 
 git add .
-git commit -m "Add $2"
+git commit -m "Add $project_name"
 git push origin main
