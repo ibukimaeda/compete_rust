@@ -18,9 +18,9 @@ use std::ops;
 use std::vec;
 
 #[allow(dead_code)]
-// const MOD: i64 = 1_000_000_007;
+const MOD: i64 = 1_000_000_007;
 // const MOD : i64 = 1_000_000_009;
-const MOD: i64 = 998_244_353;
+// const MOD: i64 = 998_244_353;
 
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
@@ -31,7 +31,248 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[usize; N]);
+
+    let mut count = vec![0; N];
+    for &a in &A {
+        count[a] += 1;
+    }
+
+    let mut is_right = true;
+    if N % 2 == 1 {
+        if count[0] != 1 {
+            is_right = false;
+        }
+
+        for i in (2..N).step_by(2) {
+            if count[i] != 2 {
+                is_right = false;
+            }
+        }
+    } else {
+        for i in (1..N).step_by(2) {
+            if count[i] != 2 {
+                is_right = false;
+            }
+        }
+    }
+    debug!(is_right, count);
+
+    if !is_right {
+        say(0);
+    } else {
+        let ans = ModInt::new(2, MOD);
+        let ans = ans.pow(N as i64 / 2);
+
+        debug!(ans);
+
+        say(ans.x);
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+struct ModInt {
+    x: i64,
+    modulo: i64,
+}
+impl ModInt {
+    #[allow(dead_code)]
+    fn new(x: i64, modulo: i64) -> Self {
+        let x = if x >= 0 {
+            x % modulo
+        } else {
+            (modulo - (-x) % modulo) % modulo
+        };
+        ModInt { x, modulo }
+    }
+    #[allow(dead_code)]
+    fn set(&mut self, x: i64) {
+        if x >= 0 {
+            self.x = x % self.modulo
+        } else {
+            self.x = (self.modulo - (-x) % self.modulo) % self.modulo
+        };
+    }
+    #[allow(dead_code)]
+    fn inv(&self) -> Self {
+        let mut a = self.x;
+        let mut b = self.modulo;
+        let mut u: i64 = 1;
+        let mut v: i64 = 0;
+        while b > 0 {
+            let t = a / b;
+            a -= t * b;
+            mem::swap(&mut a, &mut b);
+            u -= t * v;
+            mem::swap(&mut u, &mut v);
+        }
+        u %= self.modulo;
+        if u < 0 {
+            u += self.modulo;
+        }
+        return ModInt {
+            x: u,
+            modulo: self.modulo,
+        };
+    }
+    #[allow(dead_code)]
+    fn pow(&self, mut n: i64) -> Self {
+        let mut a = self.x;
+        let mut res: i64 = 1;
+        while n > 0 {
+            if n & 1 == 1 {
+                res = (res * a) % self.modulo;
+            }
+            a = (a * a) % self.modulo;
+            n >>= 1;
+        }
+        return ModInt {
+            x: res,
+            modulo: self.modulo,
+        };
+    }
+}
+impl fmt::Display for ModInt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.x)
+    }
+}
+impl ops::Neg for ModInt {
+    type Output = ModInt;
+    fn neg(self) -> Self::Output {
+        ModInt::new(-self.x, self.modulo)
+    }
+}
+impl ops::Add<ModInt> for ModInt {
+    type Output = ModInt;
+    fn add(self, rhs: Self) -> Self::Output {
+        return ModInt::new(self.x + rhs.x, self.modulo);
+    }
+}
+impl ops::Add<i64> for ModInt {
+    type Output = ModInt;
+    fn add(self, rhs: i64) -> Self::Output {
+        return ModInt::new(self.x + rhs, self.modulo);
+    }
+}
+impl<'a> ops::AddAssign<&'a Self> for ModInt {
+    fn add_assign(&mut self, rhs: &Self) {
+        self.set(self.x + rhs.x);
+    }
+}
+impl ops::AddAssign<i64> for ModInt {
+    fn add_assign(&mut self, rhs: i64) {
+        self.set(self.x + rhs);
+    }
+}
+impl ops::Sub<ModInt> for ModInt {
+    type Output = ModInt;
+    fn sub(self, rhs: Self) -> Self::Output {
+        return ModInt::new(self.x - rhs.x, self.modulo);
+    }
+}
+impl ops::Sub<i64> for ModInt {
+    type Output = ModInt;
+    fn sub(self, rhs: i64) -> Self::Output {
+        return ModInt::new(self.x - rhs, self.modulo);
+    }
+}
+impl<'a> ops::SubAssign<&'a Self> for ModInt {
+    fn sub_assign(&mut self, rhs: &Self) {
+        self.set(self.x - rhs.x);
+    }
+}
+impl ops::SubAssign<i64> for ModInt {
+    fn sub_assign(&mut self, rhs: i64) {
+        self.set(self.x - rhs);
+    }
+}
+impl ops::Mul<ModInt> for ModInt {
+    type Output = ModInt;
+    fn mul(self, rhs: Self) -> Self::Output {
+        ModInt::new(self.x * rhs.x, self.modulo)
+    }
+}
+impl ops::Mul<i64> for ModInt {
+    type Output = ModInt;
+    fn mul(self, rhs: i64) -> Self::Output {
+        ModInt::new(self.x * rhs, self.modulo)
+    }
+}
+impl<'a> ops::MulAssign<&'a Self> for ModInt {
+    fn mul_assign(&mut self, rhs: &Self) {
+        self.set(self.x * rhs.x);
+    }
+}
+impl ops::MulAssign<i64> for ModInt {
+    fn mul_assign(&mut self, rhs: i64) {
+        self.set(self.x * rhs);
+    }
+}
+impl ops::Div<ModInt> for ModInt {
+    type Output = ModInt;
+    fn div(self, rhs: Self) -> Self::Output {
+        self * rhs.inv()
+    }
+}
+impl ops::Div<i64> for ModInt {
+    type Output = ModInt;
+    fn div(self, rhs: i64) -> Self::Output {
+        self * ModInt::new(rhs, self.modulo).inv()
+    }
+}
+impl<'a> ops::DivAssign<&'a Self> for ModInt {
+    fn div_assign(&mut self, rhs: &Self) {
+        self.set(self.x * rhs.inv().x);
+    }
+}
+impl ops::DivAssign<i64> for ModInt {
+    fn div_assign(&mut self, rhs: i64) {
+        self.set(self.x * ModInt::new(rhs, self.modulo).inv().x);
+    }
+}
+impl cmp::PartialEq<ModInt> for ModInt {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x
+    }
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x
+    }
+}
+impl cmp::PartialEq<i64> for ModInt {
+    fn eq(&self, other: &i64) -> bool {
+        let other = ModInt::new(*other, self.modulo);
+        self.x == other.x
+    }
+    fn ne(&self, other: &i64) -> bool {
+        let other = ModInt::new(*other, self.modulo);
+        self.x != other.x
+    }
+}
+impl cmp::PartialOrd<ModInt> for ModInt {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        if self.x == other.x {
+            Some(cmp::Ordering::Equal)
+        } else if self.x > other.x {
+            Some(cmp::Ordering::Greater)
+        } else {
+            Some(cmp::Ordering::Less)
+        }
+    }
+}
+impl cmp::PartialOrd<i64> for ModInt {
+    fn partial_cmp(&self, other: &i64) -> Option<cmp::Ordering> {
+        let other = ModInt::new(*other, self.modulo);
+        if self.x == other.x {
+            Some(cmp::Ordering::Equal)
+        } else if self.x > other.x {
+            Some(cmp::Ordering::Greater)
+        } else {
+            Some(cmp::Ordering::Less)
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +607,3 @@ where
         r.clone()
     }
 }
-

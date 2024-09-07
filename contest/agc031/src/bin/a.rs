@@ -18,9 +18,9 @@ use std::ops;
 use std::vec;
 
 #[allow(dead_code)]
-// const MOD: i64 = 1_000_000_007;
+const MOD: i64 = 1_000_000_007;
 // const MOD : i64 = 1_000_000_009;
-const MOD: i64 = 998_244_353;
+// const MOD: i64 = 998_244_353;
 
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
@@ -31,7 +31,23 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S:Chars);
+
+    let mut cnt = vec![0; 26];
+
+    for &c in &S {
+        cnt[(c as u8 - b'a') as usize] += 1;
+    }
+
+    let mut ans = 1;
+    for i in 0..26 {
+        ans *= cnt[i] + 1;
+        ans %= MOD;
+    }
+
+    say(ans - 1);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +382,3 @@ where
         r.clone()
     }
 }
-

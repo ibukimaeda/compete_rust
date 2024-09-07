@@ -7,6 +7,7 @@ use proconio::{
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
+use tap::Tap;
 
 use std::cmp;
 use std::cmp::Reverse;
@@ -31,7 +32,50 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S:Chars);
+
+    let mut alice_targets = VecDeque::new();
+    let mut bob_targets = VecDeque::new();
+
+    for (i, &s) in S.iter().enumerate() {
+        if s == 'A' {
+            bob_targets.push_front(i);
+        } else {
+            alice_targets.push_front(i);
+        }
+    }
+
+    for k in 1..=N {
+        if k % 2 == 1 {
+            // alice turn
+            if let Some(_) = alice_targets.pop_back() {
+            } else {
+                bob_targets.pop_front();
+            }
+        } else {
+            // bob turn
+            if let Some(_) = bob_targets.pop_back() {
+            } else {
+                alice_targets.pop_front();
+            }
+        }
+
+        debug!(k, alice_targets, bob_targets);
+
+        if alice_targets.is_empty() {
+            // アリスにつぶしたいものが無い -> A しかない
+            say("Alice");
+        } else if bob_targets.is_empty() {
+            // ボブにつぶしたいものが無い -> B しかない
+            say("Bob");
+        } else if alice_targets.back().unwrap() < bob_targets.back().unwrap() {
+            say("Bob");
+        } else {
+            say("Alice");
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +410,3 @@ where
         r.clone()
     }
 }
-

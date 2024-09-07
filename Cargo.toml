@@ -1,4 +1,4 @@
-workspace = { members = ["mysnippet"], exclude = [] }
+workspace = { members = ["mysnippet", "contest/agc031", "contest/agc063", "contest/abc050"], exclude = [] }
 [package]
 name = "atcoder"
 version = "0.1.0"
