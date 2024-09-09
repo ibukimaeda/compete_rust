@@ -1,11 +1,11 @@
 use cargo_snippet::snippet;
-use std::mem;
+use std::{mem, vec};
 
 #[snippet(":union_find")]
 #[derive(Debug)]
 struct UnionFind {
     // https://qiita.com/ofutonton/items/c17dfd33fc542c222396
-    data: Vec<i64>,
+    data: Vec<i32>,
 }
 
 #[snippet(":union_find")]
@@ -18,65 +18,75 @@ impl UnionFind {
     }
 
     #[allow(dead_code)]
-    fn unite(&mut self, mut x: i64, mut y: i64) -> bool {
+    fn unite(&mut self, x: usize, y: usize) -> bool {
         // x と y を結合
-        x = self.root(x);
-        y = self.root(y);
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
 
+        let mut x = self.root(x);
+        let mut y = self.root(y);
         if x == y {
             return false;
         }
-        if self.data[x as usize] > self.data[y as usize] {
+
+        if self.data[x] > self.data[y] {
             mem::swap(&mut x, &mut y);
         }
 
-        self.data[x as usize] += self.data[y as usize];
-        self.data[y as usize] = x;
+        self.data[x] += self.data[y];
+        self.data[y] = x as i32;
         return true;
     }
 
     #[allow(dead_code)]
-    fn root(&mut self, k: i64) -> i64 {
+    fn root(&mut self, k: usize) -> usize {
         // k の属する木の根を探索
+        assert!(k < self.data.len());
         if self.data[k as usize] < 0 {
             return k;
-        } else {
-            self.data[k as usize] = self.root(self.data[k as usize]);
-            return self.data[k as usize];
         }
+
+        self.data[k as usize] = self.root(self.data[k] as usize) as i32;
+        return self.data[k] as usize;
     }
 
     #[allow(dead_code)]
-    fn size(&mut self, k: i64) -> i64 {
+    fn size(&mut self, k: usize) -> usize {
         // k の属する木の大きさを返す
-        let x: usize = self.root(k) as usize;
-        return -self.data[x];
+        assert!(k < self.data.len());
+        let x = self.root(k);
+        return -self.data[x] as usize;
     }
 
     #[allow(dead_code)]
-    fn is_same(&mut self, x: i64, y: i64) -> bool {
+    fn is_same(&mut self, x: usize, y: usize) -> bool {
         // x と y の属する木が同じかどうか
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
         return self.root(x) == self.root(y);
     }
 
     #[allow(dead_code)]
-    fn groups(&mut self) -> Vec<Vec<i64>> {
+    fn groups(&mut self) -> Vec<Vec<usize>> {
         let n = self.data.len();
-        let mut ret: Vec<Vec<i64>> = vec![vec![0; 0]; n];
+        let mut root_buf = vec![0; n];
+        let mut group_size = vec![0; n];
+
         for i in 0..n {
-            ret[self.root(i as i64) as usize].push(i as i64);
+            root_buf[i] = self.root(i);
+            group_size[root_buf[i]] += 1;
         }
-
-        let mut i = 0;
-        while i < ret.len() {
-            if ret[i].is_empty() {
-                ret.remove(i);
-            } else {
-                i += 1;
-            }
+        let mut result = vec![Vec::new(); n];
+        for i in 0..n {
+            result[i].reserve(group_size[i]);
         }
-
-        return ret;
+        for i in 0..n {
+            result[root_buf[i]].push(i);
+        }
+        result
+            .into_iter()
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<Vec<usize>>>()
     }
 }
 
