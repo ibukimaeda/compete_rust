@@ -35,13 +35,13 @@ const DY: [i64; 4] = [1, -1, 0, 0];
 fn main() {
     input!(N:usize, fs:[Usize1; N]);
 
-    let mut dsu = Dsu::new(N);
+    let mut uf = UnionFind::new(N);
 
     for i in 0..N {
-        dsu.merge(i, fs[i]);
+        uf.unite(i, fs[i]);
     }
 
-    say(ModInt::new(2, MOD).pow(dsu.groups().len() as i64) - 1);
+    say(ModInt::new(2, MOD).pow(uf.groups().len() as i64) - 1);
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -244,68 +244,6 @@ impl cmp::PartialOrd<i64> for ModInt {
         } else {
             Some(cmp::Ordering::Less)
         }
-    }
-}
-
-#[derive(Debug)]
-struct UnionFind {
-    data: Vec<i64>,
-}
-impl UnionFind {
-    #[allow(dead_code)]
-    fn new(size: usize) -> Self {
-        UnionFind {
-            data: vec![-1; size],
-        }
-    }
-    #[allow(dead_code)]
-    fn unite(&mut self, mut x: i64, mut y: i64) -> bool {
-        x = self.root(x);
-        y = self.root(y);
-        if x == y {
-            return false;
-        }
-        if self.data[x as usize] > self.data[y as usize] {
-            mem::swap(&mut x, &mut y);
-        }
-        self.data[x as usize] += self.data[y as usize];
-        self.data[y as usize] = x;
-        return true;
-    }
-    #[allow(dead_code)]
-    fn root(&mut self, k: i64) -> i64 {
-        if self.data[k as usize] < 0 {
-            return k;
-        } else {
-            self.data[k as usize] = self.root(self.data[k as usize]);
-            return self.data[k as usize];
-        }
-    }
-    #[allow(dead_code)]
-    fn size(&mut self, k: i64) -> i64 {
-        let x: usize = self.root(k) as usize;
-        return -self.data[x];
-    }
-    #[allow(dead_code)]
-    fn is_same(&mut self, x: i64, y: i64) -> bool {
-        return self.root(x) == self.root(y);
-    }
-    #[allow(dead_code)]
-    fn groups(&mut self) -> Vec<Vec<i64>> {
-        let n = self.data.len();
-        let mut ret: Vec<Vec<i64>> = vec![vec![0; 0]; n];
-        for i in 0..n {
-            ret[self.root(i as i64) as usize].push(i as i64);
-        }
-        let mut i = 0;
-        while i < ret.len() {
-            if ret[i].is_empty() {
-                ret.remove(i);
-            } else {
-                i += 1;
-            }
-        }
-        return ret;
     }
 }
 
