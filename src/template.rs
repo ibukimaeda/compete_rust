@@ -10,7 +10,7 @@ use rand::{thread_rng, Rng};
 
 use std::cmp;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
 use std::fmt;
 use std::mem;

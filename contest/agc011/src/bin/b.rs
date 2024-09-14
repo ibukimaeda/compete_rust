@@ -31,7 +31,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, mut A:[i64; N]);
+
+    A.sort();
+    let mut cumsum_A = vec![0; N + 1];
+    for i in 0..N {
+        cumsum_A[i + 1] = cumsum_A[i] + A[i];
+    }
+    debug!(A);
+
+    let mut ans = 0;
+    for i in 0..N {
+        if A[i] > 2 * cumsum_A[i] {
+            ans = i;
+        }
+    }
+
+    say(N - ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +384,3 @@ where
         r.clone()
     }
 }
-

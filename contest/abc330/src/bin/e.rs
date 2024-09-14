@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use nalgebra::zero;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
     fastout, input, input_interactive,
@@ -8,14 +9,14 @@ use proconio::{
 };
 use rand::{thread_rng, Rng};
 
-use std::cmp;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
 use std::fmt;
 use std::mem;
 use std::ops;
 use std::vec;
+use std::{any::Any, cmp, fmt::Binary};
 
 #[allow(dead_code)]
 // const MOD: i64 = 1_000_000_007;
@@ -31,7 +32,47 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, Q:usize, mut A:[i64; N], ix:[(Usize1, i64); Q]);
+
+    let mut count = vec![0; N + 1];
+    let mut zeros = BTreeSet::new();
+
+    for &a in &A {
+        if a > N as i64 {
+            continue;
+        }
+
+        count[a as usize] += 1;
+    }
+
+    for i in 0..count.len() {
+        if count[i] == 0 {
+            zeros.insert(i);
+        }
+    }
+
+    for &(i, x) in &ix {
+        if A[i] > N as i64 {
+        } else if count[A[i] as usize] == 1 {
+            count[A[i] as usize] = 0;
+            zeros.insert(A[i] as usize);
+        } else {
+            count[A[i] as usize] -= 1;
+        }
+
+        if x > N as i64 {
+        } else if count[x as usize] == 0 {
+            count[x as usize] = 1;
+            zeros.remove(&(x as usize));
+        } else {
+            count[x as usize] += 1;
+        }
+        A[i] = x;
+
+        say(zeros.iter().next().unwrap());
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +407,3 @@ where
         r.clone()
     }
 }
-
