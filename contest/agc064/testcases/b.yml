@@ -1,0 +1,71 @@
+---
+type: Batch
+timelimit: 2s
+match: Lines
+
+cases:
+  - name: sample1
+    in: |
+      3 3
+      1 2 R
+      1 3 B
+      2 3 B
+      RRB
+    out: |
+      Yes
+      2 1
+  - name: sample2
+    in: |
+      3 4
+      1 2 R
+      1 2 B
+      1 3 B
+      2 3 B
+      RRR
+    out: |
+      No
+  - name: sample3
+    in: |
+      8 16
+      5 7 B
+      2 7 R
+      1 6 R
+      1 4 R
+      6 7 R
+      4 6 B
+      4 8 R
+      2 3 R
+      3 5 R
+      6 7 B
+      2 6 B
+      5 6 R
+      1 3 B
+      4 5 B
+      2 7 B
+      1 8 B
+      BRBRRBRB
+    out: |
+      Yes
+      1 2 4 9 11 13 16
+  - name: sample4
+    in: |
+      8 10
+      1 7 R
+      1 3 B
+      2 5 B
+      2 8 R
+      1 5 R
+      3 6 R
+      2 6 B
+      3 4 B
+      2 8 B
+      4 6 B
+      RRRBBBRB
+    out: |
+      No
+
+extend:
+  - type: Text
+    path: "./b"
+    in: /in/*.txt
+    out: /out/*.txt
