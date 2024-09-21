@@ -10,7 +10,7 @@ use rand::{thread_rng, Rng};
 
 use std::cmp;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
 use std::fmt;
 use std::mem;
@@ -31,7 +31,9 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, H:[i64; N]);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +368,3 @@ where
         r.clone()
     }
 }
-

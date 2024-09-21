@@ -31,7 +31,43 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, Q:usize, mut S:Chars, XC:[(Usize1, char);Q]);
+
+    let mut count = 0;
+
+    for i in 0..N - 2 {
+        if S[i] == 'A' && S[i + 1] == 'B' && S[i + 2] == 'C' {
+            count += 1;
+        }
+    }
+
+    debug_vec!(S);
+
+    // 位置 x にある文字を c に変更する
+    for (x, c) in XC {
+        if 1 < x && S[x - 2] == 'A' && S[x - 1] == 'B' && S[x] == 'C' {
+            count -= 1;
+        } else if 0 < x && x < N - 1 && S[x - 1] == 'A' && S[x] == 'B' && S[x + 1] == 'C' {
+            count -= 1;
+        } else if x < N - 2 && S[x] == 'A' && S[x + 1] == 'B' && S[x + 2] == 'C' {
+            count -= 1;
+        }
+
+        S[x] = c;
+        debug_vec!(S);
+
+        if 1 < x && S[x - 2] == 'A' && S[x - 1] == 'B' && S[x] == 'C' {
+            count += 1;
+        } else if 0 < x && x < N - 1 && S[x - 1] == 'A' && S[x] == 'B' && S[x + 1] == 'C' {
+            count += 1;
+        } else if x < N - 2 && S[x] == 'A' && S[x + 1] == 'B' && S[x + 2] == 'C' {
+            count += 1;
+        }
+
+        say(count);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +402,3 @@ where
         r.clone()
     }
 }
-

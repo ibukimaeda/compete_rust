@@ -31,7 +31,33 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(mut M:i64);
+
+    let mut ans = vec![];
+
+    loop {
+        let mut a = 0;
+
+        loop {
+            if a < 10 && 3i64.pow(a + 1) <= M {
+                a += 1;
+            } else {
+                break;
+            }
+        }
+
+        ans.push(a);
+
+        M -= 3i64.pow(a);
+        if M == 0 {
+            break;
+        }
+    }
+
+    say(ans.len());
+    say(ans.iter().join(" "));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +392,3 @@ where
         r.clone()
     }
 }
-
