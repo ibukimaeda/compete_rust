@@ -1,3 +1,5 @@
+use std::vec;
+
 use cargo_snippet::snippet;
 
 #[snippet(":lazy_segment_tree")]
@@ -47,6 +49,7 @@ where
     }
 
     pub fn prod(&mut self, left: usize, right: usize) -> S {
+        // 区間 [left, right) の演算結果を返す
         assert!(left <= right);
         if right == left {
             (self.element)()
@@ -84,6 +87,7 @@ where
     }
 
     pub fn apply(&mut self, v: T, left: usize, right: usize) {
+        // 区間 [left, right) に v を適用
         self._apply(v, 0, left, right, 0, self.value.len() / 2 + 1);
     }
 
@@ -128,9 +132,8 @@ where
 
 #[test]
 fn test_lazy_segtree() {
-    let (w, n) = (100, 4);
     let lr = vec![(27, 100), (8, 39), (83, 97), (24, 75)];
-    let size = w;
+    let size = 100;
     let op = |x: usize, y: usize| std::cmp::max(x, y);
     let element = || 0usize;
     let mapping = |l: Option<usize>, v: usize| match l {
@@ -144,7 +147,7 @@ fn test_lazy_segtree() {
     };
     let mut segtree = LazySegmentTree::new(size, op, element, mapping, id, composite);
     let mut ans = Vec::new();
-    for i in 0..n {
+    for i in 0..lr.len() {
         let (l, r) = lr[i];
         let (l, r) = (l - 1, r - 1);
         let next_height = segtree.prod(l, r + 1) + 1;
@@ -154,3 +157,27 @@ fn test_lazy_segtree() {
 
     assert_eq!(ans, vec![1, 2, 2, 3]);
 }
+
+// #[test]
+// fn test_lazy_segtree_RMQ_RAQ() {
+//     // Range Minimum Query (RMQ) and Range Add Query (RAQ)
+//     let lr = vec![(1, 4), (1, 2), (3, 4), (2, 3)];
+//     let size = 4;
+//     let op = |x: i64, y: i64| std::cmp::min(x, y);
+//     let element = || 1e18 as i64;
+//     let mapping = |l: i64, v: i64| l + v;
+//     let id = || 0i64;
+//     let composite = |f: i64, g: i64| f + g;
+//     let initial_value = vec![0 as i64; size];
+//     let mut segtree = LazySegmentTree::new(initial_value, op, element, mapping, id, composite);
+//     let mut ans = Vec::new();
+//     for i in 0..lr.len() {
+//         let (l, r) = lr[i];
+//         let (l, r) = (l - 1, r - 1);
+//         let next_height = segtree.prod(l, r + 1);
+//         ans.push(next_height);
+//         segtree.apply(1, l, r + 1);
+//     }
+
+//     assert_eq!(ans, vec![element(), 1, 1, 2]);
+// }
