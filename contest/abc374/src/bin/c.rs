@@ -31,7 +31,28 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:[i64; N]);
+
+    let mut ans = INF;
+
+    for bit in 0..1 << N {
+        let mut sum_A = 0;
+        let mut sum_B = 0;
+
+        for i in 0..N {
+            if bit & 1 << i > 0 {
+                sum_A += K[i];
+            } else {
+                sum_B += K[i];
+            }
+        }
+
+        chmin!(ans, max!(sum_A, sum_B));
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +387,3 @@ where
         r.clone()
     }
 }
-

@@ -31,7 +31,31 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S:Chars, T:Chars);
+
+    if S.len() == T.len() {
+        if S == T {
+            say(0);
+        } else {
+            for i in 0..S.len() {
+                if S[i] != T[i] {
+                    say(i + 1);
+                    break;
+                }
+            }
+        }
+    } else {
+        for i in 0..min!(S.len(), T.len()) {
+            if S[i] != T[i] {
+                say(i + 1);
+                return;
+            }
+        }
+
+        say(min!(S.len(), T.len()) + 1);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +390,3 @@ where
         r.clone()
     }
 }
-

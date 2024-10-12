@@ -31,7 +31,40 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S: f64, T:f64, ABCD:[(f64, f64, f64, f64); N]);
+
+    let d = |x1: f64, y1: f64, x2: f64, y2: f64| -> f64 {
+        ((x1 - x2).powi(2) + (y1 - y2).powi(2)).sqrt()
+    };
+
+    let mut ans = 1e20;
+    for perm in (0..N).permutations(N) {
+        for bit in 0..1 << N {
+            let mut now = (0.0, 0.0);
+            let mut time = 0.0;
+
+            for i in 0..N {
+                let (mut x, mut y, mut a, mut b) = ABCD[perm[i]];
+
+                if bit & 1 << i > 0 {
+                    swap!(&mut x, &mut a);
+                    swap!(&mut y, &mut b);
+                }
+
+                let move_time = d(now.0, now.1, x, y) / S;
+                let laser_time = d(x, y, a, b) / T;
+
+                time += move_time + laser_time;
+                now = (a, b);
+            }
+
+            chmin!(ans, time);
+        }
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +399,3 @@ where
         r.clone()
     }
 }
-

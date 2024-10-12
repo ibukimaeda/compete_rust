@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use bitvec::ptr::swap;
 use itertools::Itertools;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
@@ -31,7 +32,78 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, X:i64, APBQ: [(i64, i64, i64, i64); N]);
+
+    let min_cost = |a: i64, p: i64, b: i64, q: i64, mid: i64| -> i64 {
+        // mid 個製造できるようにするための最小コスト
+        let mut cost = 0;
+
+        let (mut a, mut p, mut b, mut q) = (a, p, b, q);
+        if a * q > b * p {
+            swap!(&mut a, &mut b);
+            swap!(&mut p, &mut q);
+        }
+
+        cost += p * (mid / a);
+
+        // 残り r 個製造
+        let r = mid % a;
+        if r != 0 {
+            cost += min!(p, div_ceil(r, b) * q);
+        }
+
+        cost
+    };
+
+    let min_cost = |mid: i64, a: i64, p: i64, b: i64, q: i64| -> i64 {
+        let mut ok = 0;
+        let mut ng = div_ceil(mid, a) + 1;
+
+        let mut min_cost = INF;
+
+        while ng - ok > 1 {
+            let x = (ok + ng) / 2;
+
+            let remaining = mid - (a * x);
+            let y = div_ceil(remaining, b);
+
+            let cost = p * x + q * y;
+
+            chmin!(min_cost, cost);
+
+            if a * (x + 1) > mid {
+                ng = x;
+            } else {
+                ok = x;
+            }
+        }
+
+        min_cost
+    };
+
+    let mut ok = 0;
+    let mut ng = 1e10 as i64;
+
+    while ng - ok > 1 {
+        let mid = (ok + ng) / 2;
+
+        let mut cost = 0;
+        for &(a, p, b, q) in &APBQ {
+            cost += min_cost(mid, a, p, b, q);
+        }
+
+        debug!(mid, cost, cost <= X);
+
+        if cost <= X {
+            ok = mid;
+        } else {
+            ng = mid;
+        }
+    }
+
+    say(ok);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +438,3 @@ where
         r.clone()
     }
 }
-

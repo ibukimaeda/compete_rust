@@ -31,7 +31,37 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, uvw:[(Usize1, Usize1, i64); M]);
+
+    let mut x: Vec<Option<i64>> = vec![None; N];
+    let mut graph = vec![vec![]; N];
+    for &(u, v, w) in uvw.iter() {
+        graph[u].push((v, w));
+        graph[v].push((u, -w));
+    }
+
+    let mut queue = VecDeque::new();
+
+    for i in 0..N {
+        if x[i] != None {
+            continue;
+        }
+
+        x[i] = Some(0);
+        queue.push_back(i);
+        while let Some(u) = queue.pop_front() {
+            for &(v, w) in &graph[u] {
+                if x[v] == None {
+                    x[v] = Some(x[u].unwrap() + w);
+                    queue.push_back(v);
+                }
+            }
+        }
+    }
+
+    say(x.iter().map(|&x| x.unwrap()).join(" "));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +396,3 @@ where
         r.clone()
     }
 }
-

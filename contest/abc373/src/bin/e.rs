@@ -31,7 +31,64 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, K:i64, A:[i64; N]);
+
+    if N == M {
+        say(vec![0; N].iter().join(" "));
+        return;
+    }
+
+    let mut sorted_A = A.clone();
+    sorted_A.sort();
+    let (saisyou, sum_joui_M1) = {
+        let mut sum = 0;
+        for i in sorted_A.len() - (M + 1)..sorted_A.len() {
+            sum += sorted_A[i];
+        }
+        (sorted_A[sorted_A.len() - (M + 1)], sum)
+    };
+
+    debug!(sorted_A);
+    debug!(saisyou, sum_joui_M1);
+
+    let nokori = K - A.iter().sum::<i64>();
+    let mut ans = vec![0; N];
+
+    let is_ok = |now: i64, x: i64| -> bool {
+        let target = {
+            if saisyou <= now {
+                sum_joui_M1 - now
+            } else {
+                sum_joui_M1 - saisyou
+            }
+        };
+
+        if nokori - x < M as i64 * (x + 1) - target {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    for i in 0..N {
+        debug!(i, A[i]);
+        let mut ok = nokori;
+        let mut ng = -1;
+        while ok - ng > 1 {
+            debug!(i, ok, ng);
+            let mid = (ok + ng) / 2;
+            if is_ok(A[i], mid) {
+                ok = mid;
+            } else {
+                ng = mid;
+            }
+        }
+        ans[i] = ok;
+    }
+
+    say(ans.iter().join(" "));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +423,3 @@ where
         r.clone()
     }
 }
-

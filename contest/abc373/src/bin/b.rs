@@ -31,7 +31,42 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S:Chars);
+
+    let mut now = {
+        let mut now = 0;
+        for i in 0..S.len() {
+            if S[i] == 'A' {
+                now = i;
+                break;
+            }
+        }
+
+        now
+    };
+
+    let mut ans = 0;
+    for &alphabet in [
+        'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+        'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    ]
+    .iter()
+    {
+        let mut next = 0;
+        for i in 0..S.len() {
+            if S[i] == alphabet {
+                next = i;
+                break;
+            }
+        }
+
+        ans += (next as i64 - now as i64).abs();
+        now = next;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +401,3 @@ where
         r.clone()
     }
 }
-
