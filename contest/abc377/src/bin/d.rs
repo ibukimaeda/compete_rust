@@ -31,7 +31,30 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, lr: [(Usize1, Usize1); N]);
+
+    let mut h = HashMap::new();
+    for (l, r) in lr {
+        h.entry(r)
+            .and_modify(|e| *e = max!(*e, l + 1))
+            .or_insert(l + 1);
+    }
+
+    debug!(h);
+
+    let mut ans = 0;
+    let mut dr = 0;
+
+    for m in 0..M {
+        if let Some(&l) = h.get(&m) {
+            chmax!(dr, l);
+        }
+        ans += (m as i64 - dr as i64 + 1);
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +389,3 @@ where
         r.clone()
     }
 }
-

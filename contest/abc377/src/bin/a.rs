@@ -31,7 +31,26 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S:Chars);
+
+    let mut hash = HashSet::new();
+
+    for s in S {
+        hash.insert(s);
+    }
+
+    let mut is_ok = false;
+    if hash.contains(&'A') && hash.contains(&'B') && hash.contains(&'C') {
+        is_ok = true;
+    }
+
+    if is_ok {
+        yes();
+    } else {
+        no();
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +385,3 @@ where
         r.clone()
     }
 }
-

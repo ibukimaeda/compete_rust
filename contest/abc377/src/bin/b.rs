@@ -31,7 +31,72 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(mut board: [Chars; 8]);
+
+    for i in 0..8 {
+        for j in 0..8 {
+            if board[i][j] == '#' {
+                // 4方向をすべて 'a' に変更する
+                for k in 0..4 {
+                    let mut x = i;
+                    let mut y = j;
+
+                    loop {
+                        let new = updated_coordinate(x, y, DX[k], DY[k], 8, 8);
+                        if new.is_none() {
+                            break;
+                        }
+                        let new = new.unwrap();
+                        x = new.0;
+                        y = new.1;
+
+                        if board[x][y] == '#' {
+                            continue;
+                        }
+
+                        board[x][y] = 'a';
+                    }
+                }
+            }
+        }
+    }
+
+    let mut ans = 0;
+    for i in 0..8 {
+        for j in 0..8 {
+            if board[i][j] == '.' {
+                ans += 1;
+            }
+        }
+    }
+
+    say(ans);
+}
+
+#[allow(non_snake_case)]
+fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
+    let H = H as i64;
+    let W = W as i64;
+    let new_x = now.0 as i64 + dx;
+    let new_y = now.1 as i64 + dy;
+    return 0 <= new_x && new_x < H && 0 <= new_y && new_y < W;
+}
+#[allow(non_snake_case)]
+fn updated_coordinate(
+    x: usize,
+    y: usize,
+    dx: i64,
+    dy: i64,
+    H: usize,
+    W: usize,
+) -> Option<(usize, usize)> {
+    if is_in((x, y), dx, dy, H, W) {
+        return Some(((x as i64 + dx) as usize, (y as i64 + dy) as usize));
+    } else {
+        return None;
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +431,3 @@ where
         r.clone()
     }
 }
-

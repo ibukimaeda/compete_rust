@@ -31,7 +31,65 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, ab: [(Usize1, Usize1); M]);
+
+    let mut hash = HashSet::new();
+
+    // ビショップの移動方向
+    let dir = vec![
+        (2, 1),
+        (2, -1),
+        (-2, 1),
+        (-2, -1),
+        (1, 2),
+        (1, -2),
+        (-1, 2),
+        (-1, -2),
+    ];
+    for (a, b) in ab {
+        hash.insert((a, b));
+
+        for (dx, dy) in dir.iter() {
+            let new = updated_coordinate(a, b, *dx, *dy, N, N);
+            if new.is_none() {
+                continue;
+            }
+            let new = new.unwrap();
+            hash.insert(new);
+        }
+    }
+
+    debug!(hash.len());
+
+    let ans = N as i128 * N as i128 - hash.len() as i128;
+
+    say(ans);
+}
+
+#[allow(non_snake_case)]
+fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
+    let H = H as i64;
+    let W = W as i64;
+    let new_x = now.0 as i64 + dx;
+    let new_y = now.1 as i64 + dy;
+    return 0 <= new_x && new_x < H && 0 <= new_y && new_y < W;
+}
+#[allow(non_snake_case)]
+fn updated_coordinate(
+    x: usize,
+    y: usize,
+    dx: i64,
+    dy: i64,
+    H: usize,
+    W: usize,
+) -> Option<(usize, usize)> {
+    if is_in((x, y), dx, dy, H, W) {
+        return Some(((x as i64 + dx) as usize, (y as i64 + dy) as usize));
+    } else {
+        return None;
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +424,3 @@ where
         r.clone()
     }
 }
-
