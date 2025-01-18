@@ -31,7 +31,18 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, D:i64, TL:[(i64, i64); N]);
+
+    for i in 1..=D {
+        let mut ans = 0;
+        for (t, l) in TL.iter() {
+            chmax!(ans, t * (l + i));
+        }
+
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +377,3 @@ where
         r.clone()
     }
 }
-

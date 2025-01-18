@@ -31,7 +31,20 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[i64; N]);
+
+    let mut ans = 0;
+    for i in 0..N - 1 {
+        // i は小さい方
+        // A[i] の2倍以上の餅を探す
+
+        let l = A.partition_point(|&x| x < A[i] * 2);
+        ans += N - l;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +379,3 @@ where
         r.clone()
     }
 }
-

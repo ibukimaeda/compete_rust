@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use ac_library::{LazySegtree, MapMonoid, Max, Monoid};
 use itertools::Itertools;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
@@ -30,8 +31,52 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+struct MaxAdd;
+impl MapMonoid for MaxAdd {
+    type M = Max<i64>;
+    type F = i64;
+
+    fn identity_map() -> Self::F {
+        0
+    }
+    fn mapping(&f: &Self::F, &x: &<Self::M as Monoid>::S) -> <Self::M as Monoid>::S {
+        f + x
+    }
+    fn composition(&f: &Self::F, &g: &Self::F) -> Self::F {
+        f + g
+    }
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, mut A:[i64; N]);
+
+    let mut segtree: LazySegtree<MaxAdd> = vec![0i64; N].into();
+
+    for i in 0..N {
+        segtree.apply(i, A[i]);
+    }
+
+    for i in 0..N - 1 {
+        // 現在の A[i] の値を取得
+
+        let v = segtree.get(i);
+
+        // i+1 ... i+v まで 1 ずつ増加させる
+        segtree.apply_range(i + 1..(i + v as usize + 1).min(N), 1);
+
+        let used = (i as i64 + v + 1).min(N as i64) - (i as i64 + 1);
+
+        segtree.apply(i, -used);
+    }
+
+    let mut ans = vec![0; N];
+    for i in 0..N {
+        ans[i] = segtree.get(i);
+    }
+
+    println!("{}", ans.iter().join(" "));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +411,3 @@ where
         r.clone()
     }
 }
-
