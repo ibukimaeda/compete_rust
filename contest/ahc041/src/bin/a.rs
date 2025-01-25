@@ -1,12 +1,14 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+use indexmap::IndexSet;
 use itertools::Itertools;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
+use petgraph::graph;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
 };
-use rand::{thread_rng, Rng};
+use rand::{seq::SliceRandom, thread_rng, Rng};
 
 use std::cmp;
 use std::cmp::Reverse;
@@ -31,7 +33,199 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(
+        N:usize, M:usize, H:i64,
+        A:[i64;N],
+        uv: [(usize, usize);M],
+        xy: [(i64, i64);N],
+    );
+    // N = 1000
+    // 1000 <= M <= 3000
+    // H = 10
+    // 1 <= A[i] <= 100
+    // 0 <= u[i] < v[i] < N
+    // 0<= x[i], y[i] <= 1000
+    // (x[i], y[i]) はすべて異なる
+    let mut rng = rand::thread_rng();
+
+    let mut graph = vec![vec![]; N];
+    for &(u, v) in &uv {
+        graph[u].push(v);
+        graph[v].push(u);
+    }
+
+    let mut ans = vec![!0; N];
+    // let mut leafs = (0..N).into_iter().collect_vec();
+    // let mut leafs: HashSet<usize> = HashSet::from_iter((0..N).into_iter().collect_vec());
+    let mut leafs: IndexSet<usize> = IndexSet::from_iter((0..N).into_iter().collect_vec());
+    let mut num_children = vec![0; N];
+    let mut hs = vec![0; N];
+    let mut point = A.iter().sum::<i64>();
+
+    // 連鎖的に親を変えていく
+    let mut new_leaf = !0;
+
+    let mut count = 0;
+    let time_keeper = TimeKeeper::new(1.98);
+    while !time_keeper.isTimeOver() {
+        count += 1;
+
+        if leafs.is_empty() {
+            break;
+        }
+        // let &leaf = leafs.choose(&mut thread_rng()).unwrap();
+
+        // hashset ある程度ランダムらしい
+        // let &leaf = leafs.iter().next().unwrap();
+
+        // indexset インデックスによるアクセスができる
+        let leaf;
+        if new_leaf == !0 {
+            leaf = leafs[rng.gen_range(0..leafs.len())];
+        } else {
+            leaf = new_leaf;
+            new_leaf = !0;
+        }
+
+        // 現在の木から外した時のポイント
+        let (new_point, new_parent) = {
+            // 現在の木から外す
+            let mut new_point = point - A[leaf] * (hs[leaf] + 1);
+
+            // 順に leaf の辺を見ていき，接続できそうであれば，接続しポイントを計算する
+            let mut new_parent = !0;
+            for &parent in &graph[leaf] {
+                if new_parent == !0 && hs[parent] < H {
+                    new_parent = parent;
+                } else if hs[parent] < H && hs[new_parent] < hs[parent] {
+                    new_parent = parent;
+                }
+            }
+
+            // debug!(new_parent, hs[new_parent]);
+            if new_parent != !0 {
+                new_point += A[leaf] * (hs[new_parent] + 2);
+                // debug!(hs[leaf] + 1, hs[new_parent] + 2, point < new_point);
+            }
+
+            (new_point, new_parent)
+        };
+
+        // debug!(leaf, point, new_point, new_parent);
+
+        if point < new_point {
+            // 親を変更したほうがポイントが高い
+
+            let old_parent = ans[leaf];
+            if old_parent != !0 {
+                // すでに親がいる場合は，その親の子供の数を減らす
+                num_children[ans[leaf]] -= 1;
+
+                // その親が葉になる可能性があるので，leafs に追加する
+                if num_children[ans[leaf]] == 0 {
+                    leafs.insert(ans[leaf]);
+                    new_leaf = old_parent;
+                }
+            }
+
+            point = new_point;
+            ans[leaf] = new_parent;
+            leafs.remove(&new_parent);
+            num_children[new_parent] += 1;
+            hs[leaf] = hs[new_parent] + 1;
+        }
+
+        // if count % 100 == 0 {
+        //     say_ans(&ans);
+        //     debug!(leafs.len());
+        // }
+    }
+
+    debug!(count);
+
+    say_ans(&ans);
+}
+
+fn say_ans(ans: &Vec<usize>) {
+    println!(
+        "{}",
+        ans.iter()
+            .map(|&x| if x != !0 { x as i64 } else { !0 })
+            .join(" ")
+    );
+}
+
+#[derive(Debug)]
+struct UnionFind {
+    data: Vec<i32>,
+}
+impl UnionFind {
+    #[allow(dead_code)]
+    fn new(size: usize) -> Self {
+        UnionFind {
+            data: vec![-1; size],
+        }
+    }
+    #[allow(dead_code)]
+    fn unite(&mut self, x: usize, y: usize) -> bool {
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
+        let mut x = self.root(x);
+        let mut y = self.root(y);
+        if x == y {
+            return false;
+        }
+        if self.data[x] > self.data[y] {
+            mem::swap(&mut x, &mut y);
+        }
+        self.data[x] += self.data[y];
+        self.data[y] = x as i32;
+        return true;
+    }
+    #[allow(dead_code)]
+    fn root(&mut self, k: usize) -> usize {
+        assert!(k < self.data.len());
+        if self.data[k as usize] < 0 {
+            return k;
+        }
+        self.data[k as usize] = self.root(self.data[k] as usize) as i32;
+        return self.data[k] as usize;
+    }
+    #[allow(dead_code)]
+    fn size(&mut self, k: usize) -> usize {
+        assert!(k < self.data.len());
+        let x = self.root(k);
+        return -self.data[x] as usize;
+    }
+    #[allow(dead_code)]
+    fn is_same(&mut self, x: usize, y: usize) -> bool {
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
+        return self.root(x) == self.root(y);
+    }
+    #[allow(dead_code)]
+    fn groups(&mut self) -> Vec<Vec<usize>> {
+        let n = self.data.len();
+        let mut root_buf = vec![0; n];
+        let mut group_size = vec![0; n];
+        for i in 0..n {
+            root_buf[i] = self.root(i);
+            group_size[root_buf[i]] += 1;
+        }
+        let mut result = vec![Vec::new(); n];
+        for i in 0..n {
+            result[i].reserve(group_size[i]);
+        }
+        for i in 0..n {
+            result[root_buf[i]].push(i);
+        }
+        result
+            .into_iter()
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<Vec<usize>>>()
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +560,29 @@ where
         r.clone()
     }
 }
+#[derive(Debug, Clone)]
+struct TimeKeeper {
+    start_time: std::time::Instant,
+    time_threshold: f64,
+}
 
+impl TimeKeeper {
+    fn new(time_threshold: f64) -> Self {
+        TimeKeeper {
+            start_time: std::time::Instant::now(),
+            time_threshold,
+        }
+    }
+    #[inline]
+    fn isTimeOver(&self) -> bool {
+        let elapsed_time = self.start_time.elapsed().as_nanos() as f64 * 1e-9;
+        #[cfg(feature = "local")]
+        {
+            elapsed_time * 0.85 >= self.time_threshold
+        }
+        #[cfg(not(feature = "local"))]
+        {
+            elapsed_time >= self.time_threshold
+        }
+    }
+}

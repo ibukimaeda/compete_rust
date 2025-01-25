@@ -9,7 +9,7 @@ use proconio::{
 use rand::{thread_rng, Rng};
 
 use std::cmp;
-use std::cmp::Reverse;
+use std::cmp::{Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
 use std::fmt;
@@ -31,7 +31,63 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:i128, P:[i128;N]);
+
+    let mut price = BinaryHeap::new();
+    for i in 0..N {
+        price.push(Reverse(Price::new(P[i], 1)));
+    }
+
+    let mut ans = 0;
+    let mut now_price = 0;
+    loop {
+        let Reverse(p) = price.pop().unwrap();
+        let mut copied_now_price = now_price;
+        copied_now_price += p.price * (2 * p.num - 1);
+
+        if copied_now_price > M {
+            break;
+        }
+
+        now_price = copied_now_price;
+        ans += 1;
+        price.push(Reverse(Price::new(p.price, p.num + 1)));
+
+        if ans % 10 == 0 {
+            debug!(ans, now_price);
+            debug!(price);
+        }
+        // debug!(price);
+    }
+    debug!(price);
+
+    say(ans);
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct Price {
+    price: i128,
+    num: i128,
+}
+
+impl Price {
+    fn new(price: i128, num: i128) -> Self {
+        Price { price, num }
+    }
+}
+
+impl PartialOrd for Price {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
+}
+
+impl Ord for Price {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (self.price * (2 * self.num - 1)).cmp(&(other.price * (2 * other.num - 1)))
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +422,3 @@ where
         r.clone()
     }
 }
-

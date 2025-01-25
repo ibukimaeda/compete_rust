@@ -30,8 +30,41 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
-#[allow(non_snake_case)]
-fn main() {}
+/// 天井と床を求める関数
+fn cf(x: f64, r: f64) -> (i64, i64) {
+    let low = (x - r).ceil() as i64;
+    let high = (x + r).floor() as i64;
+    (low, high)
+}
+
+fn main() {
+    input!(R:i64);
+
+    let (a, b, r) = (0.5, 0.5, R as f64);
+
+    let (start, end) = cf(a, r);
+
+    let mut kousitens = vec![];
+    for i in start..=end {
+        let p = ((r.powi(2) - (a - i as f64).powi(2)).sqrt()).max(0.0);
+
+        let (bottom, top) = cf(b, p);
+        let kousiten = top - bottom + 1;
+        debug!(i, p, bottom, top, kousiten);
+
+        kousitens.push(kousiten);
+    }
+
+    debug!(kousitens);
+
+    let mut ans = 0;
+
+    for i in 1..kousitens.len() {
+        ans += min!(kousitens[i - 1], kousitens[i]) - 1;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +399,3 @@ where
         r.clone()
     }
 }
-

@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use nalgebra::point;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
     fastout, input, input_interactive,
@@ -31,7 +32,28 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(Q:i64);
+
+    let mut wait = vec![];
+    let mut cum = vec![0];
+    let mut head = 0;
+    for _ in 0..Q {
+        input_interactive!(op: i64);
+
+        if op == 1 {
+            input_interactive!(l: i64);
+            wait.push(l);
+            cum.push(cum.last().unwrap() + l);
+        } else if op == 2 {
+            head += 1;
+        } else {
+            input_interactive!(k: usize);
+            let ans = cum[head + k - 1] - cum[head];
+            say(ans);
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +388,3 @@ where
         r.clone()
     }
 }
-
