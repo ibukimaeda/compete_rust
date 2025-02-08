@@ -30,8 +30,88 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+fn calc_require_change(
+    bits: &Vec<Vec<char>>,
+    count_1: &Vec<Vec<usize>>,
+    h: usize,
+    i: usize,
+) -> usize {
+    // bits[h][i] の値を変更するために必要な変更回数
+    if h == 0 {
+        if bits[h][i] == '1' {
+            return count_1[h][i] - 1;
+        } else {
+            return 2 - count_1[h][i];
+        }
+    }
+
+    // h >= 1
+    if bits[h][i] == '1' {
+        // 0 となるように変換
+        let mut num = vec![];
+        for j in 0..3 {
+            if bits[h - 1][i * 3 + j] == '1' {
+                num.push(calc_require_change(bits, count_1, h - 1, i * 3 + j));
+            }
+        }
+
+        num.sort();
+        let require_change = count_1[h][i] - 1; // 1 or 2
+        if require_change == 1 {
+            return num[0];
+        } else {
+            return num[0] + num[1];
+        }
+    } else {
+        // 1 となるように変換
+
+        let mut num = vec![];
+        for j in 0..3 {
+            if bits[h - 1][i * 3 + j] == '0' {
+                num.push(calc_require_change(bits, count_1, h - 1, i * 3 + j));
+            }
+        }
+
+        num.sort();
+        let require_change = 2 - count_1[h][i]; // 1 or 2
+        if require_change == 1 {
+            return num[0];
+        } else {
+            return num[0] + num[1];
+        }
+    }
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, bit: Chars);
+
+    let mut count_1 = vec![vec![]; N];
+    let mut bits = vec![vec![]; N];
+
+    for h in 0..N {
+        for i in 0..3usize.pow((N - 1 - h) as u32) {
+            let count;
+            if h == 0 {
+                count = bit[i * 3..(i + 1) * 3]
+                    .iter()
+                    .filter(|&&c| c == '1')
+                    .count();
+            } else {
+                count = bits[h - 1][i * 3..(i + 1) * 3]
+                    .iter()
+                    .filter(|&&c| c == '1')
+                    .count();
+            }
+            count_1[h].push(count);
+            bits[h].push(if count >= 2 { '1' } else { '0' });
+        }
+    }
+    debug_vec2!(count_1);
+    debug_vec2!(bits);
+
+    say(calc_require_change(&bits, &count_1, N - 1, 0));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +446,3 @@ where
         r.clone()
     }
 }
-

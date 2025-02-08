@@ -31,7 +31,27 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(D: String);
+
+    if D == "N" {
+        println!("S");
+    } else if D == "S" {
+        println!("N");
+    } else if D == "E" {
+        println!("W");
+    } else if D == "W" {
+        println!("E");
+    } else if D == "NE" {
+        println!("SW");
+    } else if D == "NW" {
+        println!("SE");
+    } else if D == "SE" {
+        println!("NW");
+    } else if D == "SW" {
+        println!("NE");
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +386,3 @@ where
         r.clone()
     }
 }
-

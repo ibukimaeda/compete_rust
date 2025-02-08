@@ -31,7 +31,54 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, W:usize, XY:[(Usize1, i64); N], Q:usize, TA:[(usize, Usize1); Q]);
+
+    let mut col = vec![vec![]; W];
+
+    for (i, &(x, y)) in XY.iter().enumerate() {
+        col[x].push((y, i));
+    }
+
+    for i in 0..W {
+        col[i].sort_by(|a, b| a.0.cmp(&b.0));
+    }
+
+    let mut life = vec![-1; N];
+    {
+        let mut h = 0;
+        loop {
+            let mut max_h = 0;
+            let mut is_end = false;
+            for i in 0..W {
+                if col[i].len() > h {
+                    chmax!(max_h, col[i][h].0);
+                } else {
+                    is_end = true;
+                    break;
+                }
+            }
+
+            if is_end {
+                break;
+            }
+
+            for i in 0..W {
+                life[col[i][h].1] = max_h;
+            }
+
+            h += 1;
+        }
+    }
+
+    for (t, a) in TA {
+        if life[a] == -1 || life[a] > t as i64 {
+            yes();
+        } else {
+            no();
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +413,3 @@ where
         r.clone()
     }
 }
-

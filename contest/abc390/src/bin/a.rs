@@ -31,7 +31,29 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(A:[i64; 5]);
+
+    let mut one_swaped = vec![1, 2, 3, 4, 5];
+
+    let mut sorted_A = A.clone();
+    sorted_A.sort();
+    if sorted_A != vec![1, 2, 3, 4, 5] {
+        no();
+        return;
+    }
+
+    for i in 0..5 - 1 {
+        let mut swaped = one_swaped.clone();
+        swaped.swap(i, i + 1);
+        if swaped == A {
+            yes();
+            return;
+        }
+    }
+
+    no();
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +388,3 @@ where
         r.clone()
     }
 }
-

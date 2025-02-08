@@ -31,7 +31,36 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(N:usize, Q:usize);
+
+    let mut num_many_place = 0;
+    let mut count = vec![1; N];
+    let mut place = (0..N).collect::<Vec<_>>();
+
+    for _ in 0..Q {
+        input_interactive!(op:usize);
+
+        if op == 1 {
+            input_interactive!(P:Usize1, H:Usize1);
+
+            let old_place = place[P];
+            place[P] = H;
+
+            if count[old_place] == 2 {
+                num_many_place -= 1;
+            }
+            count[old_place] -= 1;
+
+            if count[H] == 1 {
+                num_many_place += 1;
+            }
+            count[H] += 1;
+        } else {
+            say(num_many_place);
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +395,3 @@ where
         r.clone()
     }
 }
-

@@ -31,7 +31,113 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, mut A:[i128;N], mut  B:[i128;N], mut C:[i128;N]);
+
+    // 伴兵
+    A.push(0);
+    B.push(0);
+    C.push(0);
+
+    // 降順にソート
+    A.sort_by(|a, b| b.cmp(a));
+    B.sort_by(|a, b| b.cmp(a));
+    C.sort_by(|a, b| b.cmp(a));
+
+    let (mut a, mut b, mut c) = (0, 0, 0);
+    let mut changed_place = -1;
+    loop {
+        let next_a = a + 1;
+        let next_b = b + 1;
+        let next_c = c + 1;
+
+        if A[next_a] >= B[next_b] && A[next_a] >= C[next_c] {
+            a = next_a;
+            changed_place = 1;
+        } else if B[next_b] >= A[next_a] && B[next_b] >= C[next_c] {
+            b = next_b;
+            changed_place = 2;
+        } else {
+            c = next_c;
+            changed_place = 3;
+        }
+
+        if (a + 1) * (b + 1) * (c + 1) >= K {
+            break;
+        }
+    }
+
+    let mut fixed_value;
+    let mut fixed_place;
+    let (mut D, mut E);
+    let (mut d, mut e);
+    if changed_place == 1 {
+        fixed_value = A[a - 1];
+        fixed_place = a - 1;
+        D = B;
+        E = C;
+        d = b;
+        e = c;
+    } else if changed_place == 2 {
+        fixed_value = B[b - 1];
+        fixed_place = b - 1;
+        D = A;
+        E = C;
+        d = a;
+        e = c;
+    } else {
+        fixed_value = C[c - 1];
+        fixed_place = c - 1;
+        D = A;
+        E = B;
+        d = a;
+        e = b;
+    }
+
+    let now_num = (d + 1) * (e + 1) * (fixed_place + 1);
+
+    let mut changed_place = -1;
+    loop {
+        let next_d = d + 1;
+        let next_e = e + 1;
+
+        if D[next_d] >= E[next_e] {
+            d = next_d;
+            changed_place = 1;
+        } else {
+            e = next_e;
+            changed_place = 2;
+        }
+
+        if (d + 1) * (e + 1) >= K - now_num {
+            break;
+        }
+    }
+
+    let mut fixed_value2;
+    let mut fixed_place2;
+    let mut F;
+    let mut f;
+    if changed_place == 1 {
+        fixed_value2 = D[d - 1];
+        fixed_place2 = d - 1;
+        F = E;
+        f = e;
+    } else {
+        fixed_value2 = E[e - 1];
+        fixed_place2 = e - 1;
+        F = D;
+        f = d;
+    }
+
+    let now_num2 = now_num + (f + 1) * (fixed_place2 + 1);
+
+    let f_value = F[f + (K - now_num2)];
+    println!(
+        "{}",
+        fixed_value * fixed_value2 + fixed_value2 * f_value + f_value * fixed_value
+    );
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +472,3 @@ where
         r.clone()
     }
 }
-

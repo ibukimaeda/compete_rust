@@ -31,7 +31,38 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(H:usize, W:usize, S:[Chars; H]);
+
+    let black = '#';
+    let white = '.';
+    let blank = '?';
+
+    let (mut max_h, mut min_h, mut max_w, mut min_w) = (0, !0, 0, !0);
+    for h in 0..H {
+        for w in 0..W {
+            if S[h][w] == black {
+                chmax!(max_h, h);
+                chmin!(min_h, h);
+                chmax!(max_w, w);
+                chmin!(min_w, w);
+            }
+        }
+    }
+
+    debug!(min_h, max_h, min_w, max_w);
+
+    for h in min_h..=max_h {
+        for w in min_w..=max_w {
+            if S[h][w] == white {
+                no();
+                return;
+            }
+        }
+    }
+
+    yes();
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +397,3 @@ where
         r.clone()
     }
 }
-

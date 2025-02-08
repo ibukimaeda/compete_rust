@@ -31,7 +31,33 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N: usize, A: [i128; N]);
+
+    let mut set = HashSet::new();
+
+    rec(&mut set, &mut A.clone(), N);
+
+    println!("{}", set.len());
+}
+
+fn rec(set: &mut HashSet<i128>, A: &mut Vec<i128>, n: usize) {
+    let mut sum = 0;
+    for i in 0..n {
+        sum ^= A[i];
+    }
+    set.insert(sum);
+
+    for i in 0..n - 1 {
+        for j in i + 1..n {
+            A[i] += A[j];
+            A.swap(j, n - 1);
+            rec(set, A, n - 1);
+            A.swap(j, n - 1);
+            A[i] -= A[j];
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +392,3 @@ where
         r.clone()
     }
 }
-

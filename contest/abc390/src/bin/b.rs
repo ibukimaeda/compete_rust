@@ -31,7 +31,18 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize,A:[i64; N]);
+
+    for i in 0..N - 1 {
+        if A[0] * A[i + 1] != A[i] * A[1] {
+            no();
+            return;
+        }
+    }
+
+    yes();
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +377,3 @@ where
         r.clone()
     }
 }
-

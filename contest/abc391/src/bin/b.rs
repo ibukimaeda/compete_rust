@@ -31,7 +31,30 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, S:[Chars; N], T:[Chars; M]);
+
+    for i in 0..N - M + 1 {
+        for j in 0..N - M + 1 {
+            let mut ok = true;
+            for k in 0..M {
+                for l in 0..M {
+                    if S[i + k][j + l] != T[k][l] {
+                        ok = false;
+                        break;
+                    }
+                }
+                if !ok {
+                    break;
+                }
+            }
+            if ok {
+                println!("{} {}", i + 1, j + 1);
+                return;
+            }
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +389,3 @@ where
         r.clone()
     }
 }
-
