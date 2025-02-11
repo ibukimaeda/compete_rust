@@ -31,7 +31,127 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, AB:[(Usize1, Usize1);M]);
+
+    let mut uf = UnionFind::new(N);
+    let mut yojou_AB = vec![];
+    for (i, &(a, b)) in AB.iter().enumerate() {
+        if !uf.unite(a, b) {
+            yojou_AB.push(i);
+        }
+    }
+
+    let mut root_yojou = HashMap::new();
+    for i in 0..N {
+        let root = uf.root(i);
+        root_yojou.entry(root).or_insert(HashSet::new());
+    }
+
+    for i in 0..yojou_AB.len() {
+        let root = uf.root(AB[yojou_AB[i]].0);
+        root_yojou
+            .entry(root)
+            .or_insert(HashSet::new())
+            .insert(yojou_AB[i]);
+    }
+
+    let ans_K = root_yojou.len() - 1;
+    let mut ans = vec![];
+    let mut root_yojou_vec = vec![];
+    for (root, yojous) in root_yojou {
+        root_yojou_vec.push((root, yojous));
+    }
+
+    // 辺の多いものからソート
+    root_yojou_vec.sort_by_key(|x| -(x.1.len() as i64));
+    debug!(root_yojou_vec);
+    for idx in 1..root_yojou_vec.len() {
+        debug!(root_yojou_vec[0]);
+        let drained = *root_yojou_vec[0].1.iter().next().unwrap();
+        root_yojou_vec[0].1.remove(&drained);
+        let (_, b) = AB[drained];
+        ans.push((drained, b, root_yojou_vec[idx].0));
+        let (left, right) = root_yojou_vec.split_at_mut(idx);
+        left[0].1.extend(&right[0].1);
+    }
+
+    println!("{}", ans_K);
+    for (a, b, c) in ans {
+        println!("{} {} {}", a + 1, b + 1, c + 1);
+    }
+}
+
+#[derive(Debug)]
+struct UnionFind {
+    data: Vec<i32>,
+}
+impl UnionFind {
+    #[allow(dead_code)]
+    fn new(size: usize) -> Self {
+        UnionFind {
+            data: vec![-1; size],
+        }
+    }
+    #[allow(dead_code)]
+    fn unite(&mut self, x: usize, y: usize) -> bool {
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
+        let mut x = self.root(x);
+        let mut y = self.root(y);
+        if x == y {
+            return false;
+        }
+        if self.data[x] > self.data[y] {
+            mem::swap(&mut x, &mut y);
+        }
+        self.data[x] += self.data[y];
+        self.data[y] = x as i32;
+        return true;
+    }
+    #[allow(dead_code)]
+    fn root(&mut self, k: usize) -> usize {
+        assert!(k < self.data.len());
+        if self.data[k as usize] < 0 {
+            return k;
+        }
+        self.data[k as usize] = self.root(self.data[k] as usize) as i32;
+        return self.data[k] as usize;
+    }
+    #[allow(dead_code)]
+    fn size(&mut self, k: usize) -> usize {
+        assert!(k < self.data.len());
+        let x = self.root(k);
+        return -self.data[x] as usize;
+    }
+    #[allow(dead_code)]
+    fn is_same(&mut self, x: usize, y: usize) -> bool {
+        assert!(x < self.data.len());
+        assert!(y < self.data.len());
+        return self.root(x) == self.root(y);
+    }
+    #[allow(dead_code)]
+    fn groups(&mut self) -> Vec<Vec<usize>> {
+        let n = self.data.len();
+        let mut root_buf = vec![0; n];
+        let mut group_size = vec![0; n];
+        for i in 0..n {
+            root_buf[i] = self.root(i);
+            group_size[root_buf[i]] += 1;
+        }
+        let mut result = vec![Vec::new(); n];
+        for i in 0..n {
+            result[i].reserve(group_size[i]);
+        }
+        for i in 0..n {
+            result[root_buf[i]].push(i);
+        }
+        result
+            .into_iter()
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<Vec<usize>>>()
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +486,3 @@ where
         r.clone()
     }
 }
-

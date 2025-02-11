@@ -1,7 +1,6 @@
 use cargo_snippet::snippet;
 
-// こんなかんじでアノテーションで以下の関数がスニペットであることを指定します
-// この場合mymathとgcdという名前のスニペットであることを表しています
+#[allow(dead_code)]
 #[snippet("mymath")]
 #[snippet("gcd")]
 fn gcd(a: u64, b: u64) -> u64 {
@@ -12,7 +11,7 @@ fn gcd(a: u64, b: u64) -> u64 {
     }
 }
 
-// こっちの書き方でもいいです
+#[allow(dead_code)]
 #[snippet(name = "mymath")]
 // 名前を省略すると関数名がそのままスニペット名になります
 #[snippet]
@@ -20,6 +19,7 @@ fn lcm(a: u64, b: u64) -> u64 {
     a / gcd(a, b) * b
 }
 
+#[allow(dead_code)]
 #[snippet]
 // スニペットに依存関係がある場合は以下のように指定できます
 #[snippet(include = "gcd")]

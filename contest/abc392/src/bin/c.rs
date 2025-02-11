@@ -31,7 +31,22 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, P:[Usize1;N], Q:[Usize1;N]);
+
+    let mut back_Q = vec![0; N];
+    for i in 0..N {
+        back_Q[Q[i]] = i;
+    }
+
+    let mut anss = vec![];
+    for i in 0..N {
+        let ans = Q[P[back_Q[i]]];
+        anss.push(ans + 1);
+    }
+
+    say_vec(anss);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +381,3 @@ where
         r.clone()
     }
 }
-

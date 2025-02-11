@@ -5,6 +5,7 @@ use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 
 const INF: i64 = 1_010_000_000_000_000_017;
 
+#[allow(dead_code)]
 #[snippet(":dijkstra")]
 fn dijkstra(graph: &Vec<Vec<(usize, i64)>>, start: usize) -> Vec<i64> {
     let mut dist = vec![INF; graph.len()];

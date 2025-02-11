@@ -1,5 +1,6 @@
 use cargo_snippet::snippet;
 
+#[allow(dead_code)]
 #[snippet(":updated_coordinate")]
 #[allow(non_snake_case)]
 fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
@@ -26,6 +27,7 @@ fn test_is_in() {
     assert_eq!(is_in((0, 0), 3, 0, 3, 3), false);
 }
 
+#[allow(dead_code)]
 #[snippet(":updated_coordinate")]
 #[allow(non_snake_case)]
 fn updated_coordinate(
@@ -55,6 +57,7 @@ fn test_updated_coordinate() {
     assert_eq!(updated_coordinate(0, 0, 1, -1, 3, 3), None);
 }
 
+#[allow(dead_code)]
 #[snippet(":rotated")]
 fn rotated<T: Default + Clone>(grid: &Vec<Vec<T>>) -> Vec<Vec<T>> {
     // 2次配列を右回りに90度回転したものを返す
@@ -74,6 +77,7 @@ fn test_rotated() {
     assert_eq!(rotated_grid, vec![vec![5, 3, 1], vec![6, 4, 2]]);
 }
 
+#[allow(dead_code)]
 #[snippet(":shifted")]
 fn shifted<T: Default + Clone>(grid: &Vec<Vec<T>>, dx: i64, dy: i64, default: T) -> Vec<Vec<T>> {
     // 2次元配列を下に dx 右に dy 動かしたものを返す

@@ -1,5 +1,6 @@
 use cargo_snippet::snippet;
 
+#[allow(dead_code)]
 #[snippet(":extgcd")]
 fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     // ax + by = gcd(a, b) を満たす x, y, gcd(a, b) を返す
@@ -21,6 +22,7 @@ fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     (x, y, g)
 }
 
+#[allow(dead_code)]
 #[snippet(name = ":extgcd")]
 fn positive_extgcd(a: i64, b: i64) -> Option<(i64, i64, i64)> {
     // ax + by = gcd(a, b) を満たす正の x, y が存在すれば x, y, gcd(x, y) を返す

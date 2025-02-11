@@ -31,7 +31,42 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(N:usize);
+
+    let mut num_men = vec![];
+    let mut dice: Vec<HashMap<usize, usize>> = vec![];
+    let mut keys: Vec<HashSet<usize>> = vec![];
+    for _ in 0..N {
+        input_interactive!(K:usize, A:[usize;K]);
+        let mut map = HashMap::new();
+        for a in A {
+            *map.entry(a).or_insert(0) += 1;
+        }
+        num_men.push(K);
+        keys.push(map.keys().cloned().collect::<HashSet<usize>>());
+        dice.push(map);
+    }
+
+    debug!(dice);
+    debug!(keys);
+
+    let mut ans = 0.0;
+    for i in 0..N {
+        for j in i + 1..N {
+            let same_keys = &keys[i] & &keys[j];
+            let mut prob = 0.0;
+            for key in same_keys {
+                let prob1 = *dice[i].get(&key).unwrap() as f64 / num_men[i] as f64;
+                let prob2 = *dice[j].get(&key).unwrap() as f64 / num_men[j] as f64;
+                prob += prob1 * prob2;
+            }
+            chmax!(ans, prob);
+        }
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +401,3 @@ where
         r.clone()
     }
 }
-

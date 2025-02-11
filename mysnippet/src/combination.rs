@@ -18,6 +18,7 @@ impl<Int> CombUtil<Int>
 where
     Int: PrimInt + Default,
 {
+    #[allow(dead_code)]
     fn new(size: usize, mod_value: Int) -> Self {
         let mut fc = vec![Int::default(); size + 1];
         let mut ifc = vec![Int::default(); size + 1];
@@ -35,18 +36,22 @@ where
         Self { fc, ifc, mod_value }
     }
 
+    #[allow(dead_code)]
     fn fact(&self, n: usize) -> Int {
         self.fc[n]
     }
 
+    #[allow(dead_code)]
     fn inv_fact(&self, n: usize) -> Int {
         self.ifc[n]
     }
 
+    #[allow(dead_code)]
     fn inv(n: Int, mod_value: Int) -> Int {
         Self::pow(n, mod_value - Int::from(2).unwrap(), mod_value)
     }
 
+    #[allow(dead_code)]
     fn pow(n: Int, mut a: Int, mod_value: Int) -> Int {
         let mut res = Int::from(1).unwrap();
         let mut exp = n % mod_value;
@@ -60,6 +65,7 @@ where
         res
     }
 
+    #[allow(dead_code)]
     fn npr(&self, n: usize, r: usize) -> Int {
         if r > n {
             Int::from(0).unwrap()
@@ -68,6 +74,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     fn ncr(&self, n: i64, r: i64) -> Int {
         if n < 0 || r < 0 || n < r {
             Int::from(0).unwrap()
@@ -77,6 +84,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     fn homo(&self, n: i64, r: i64) -> Int {
         if r == 0 {
             Int::from(1).unwrap()
@@ -88,6 +96,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[snippet(":comb")]
 type Comb = CombUtil<i64>;
 

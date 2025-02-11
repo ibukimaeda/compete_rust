@@ -31,7 +31,30 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, A:[i64;M]);
+
+    let mut exist = vec![false; N + 10];
+
+    for a in A {
+        exist[a as usize] = true;
+    }
+
+    let mut not_exist = vec![];
+    for i in 1..=N {
+        if !exist[i] {
+            not_exist.push(i);
+        }
+    }
+
+    if not_exist.is_empty() {
+        println!("0");
+        println!();
+    } else {
+        say(not_exist.len());
+        say_vec(not_exist);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +389,3 @@ where
         r.clone()
     }
 }
-

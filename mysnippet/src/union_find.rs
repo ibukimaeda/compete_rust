@@ -5,7 +5,7 @@ use std::{mem, vec};
 #[derive(Debug)]
 struct UnionFind {
     // https://qiita.com/ofutonton/items/c17dfd33fc542c222396
-    data: Vec<i32>,
+    parent: Vec<i32>,
 }
 
 #[snippet(":union_find")]
@@ -13,15 +13,15 @@ impl UnionFind {
     #[allow(dead_code)]
     fn new(size: usize) -> Self {
         UnionFind {
-            data: vec![-1; size],
+            parent: vec![-1; size],
         }
     }
 
     #[allow(dead_code)]
     fn unite(&mut self, x: usize, y: usize) -> bool {
         // x と y を結合
-        assert!(x < self.data.len());
-        assert!(y < self.data.len());
+        assert!(x < self.parent.len());
+        assert!(y < self.parent.len());
 
         let mut x = self.root(x);
         let mut y = self.root(y);
@@ -29,46 +29,46 @@ impl UnionFind {
             return false;
         }
 
-        if self.data[x] > self.data[y] {
+        if self.parent[x] > self.parent[y] {
             mem::swap(&mut x, &mut y);
         }
 
-        self.data[x] += self.data[y];
-        self.data[y] = x as i32;
+        self.parent[x] += self.parent[y];
+        self.parent[y] = x as i32;
         return true;
     }
 
     #[allow(dead_code)]
     fn root(&mut self, k: usize) -> usize {
         // k の属する木の根を探索
-        assert!(k < self.data.len());
-        if self.data[k as usize] < 0 {
+        assert!(k < self.parent.len());
+        if self.parent[k as usize] < 0 {
             return k;
         }
 
-        self.data[k as usize] = self.root(self.data[k] as usize) as i32;
-        return self.data[k] as usize;
+        self.parent[k as usize] = self.root(self.parent[k] as usize) as i32;
+        return self.parent[k] as usize;
     }
 
     #[allow(dead_code)]
     fn size(&mut self, k: usize) -> usize {
         // k の属する木の大きさを返す
-        assert!(k < self.data.len());
+        assert!(k < self.parent.len());
         let x = self.root(k);
-        return -self.data[x] as usize;
+        return -self.parent[x] as usize;
     }
 
     #[allow(dead_code)]
     fn is_same(&mut self, x: usize, y: usize) -> bool {
         // x と y の属する木が同じかどうか
-        assert!(x < self.data.len());
-        assert!(y < self.data.len());
+        assert!(x < self.parent.len());
+        assert!(y < self.parent.len());
         return self.root(x) == self.root(y);
     }
 
     #[allow(dead_code)]
     fn groups(&mut self) -> Vec<Vec<usize>> {
-        let n = self.data.len();
+        let n = self.parent.len();
         let mut root_buf = vec![0; n];
         let mut group_size = vec![0; n];
 
