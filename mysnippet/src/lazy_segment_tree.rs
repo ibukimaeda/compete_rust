@@ -146,7 +146,7 @@ impl RangeAddMinSegTree {
     pub fn range_add_min(size: usize) -> Self {
         // 区間加算，区間最小
         let op = |x: i64, y: i64| std::cmp::min(x, y);
-        let element = || std::i64::MAX;
+        let element = || 1_010_000_000_000_000_017;
         let id = || 0i64;
         let mapping = |f: i64, x: i64| f + x;
         let composite = |f: i64, g: i64| f + g;
@@ -189,7 +189,7 @@ fn test_lazy_segtree_range_add_min() {
 
     let mut segtree = RangeAddMinSegTree::range_add_min(size);
 
-    // segtree.apply(1, 0, 5);
+    segtree.apply(1, 0, 5);
     // segtree.apply(2, 3, 7);
     // segtree.apply(3, 5, 10);
     // assert_eq!(segtree.prod(0, 10), 1);

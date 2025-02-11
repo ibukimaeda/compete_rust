@@ -280,7 +280,7 @@
       "impl RangeAddMinSegTree {",
       "    pub fn range_add_min(size: usize) -> Self {",
       "        let op = |x: i64, y: i64| std::cmp::min(x, y);",
-      "        let element = || std::i64::MAX;",
+      "        let element = || 1_010_000_000_000_000_017;",
       "        let id = || 0i64;",
       "        let mapping = |f: i64, x: i64| f + x;",
       "        let composite = |f: i64, g: i64| f + g;",
