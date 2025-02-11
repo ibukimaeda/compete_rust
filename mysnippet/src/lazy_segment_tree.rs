@@ -33,10 +33,19 @@ where
     H: Fn() -> T,
     I: Fn(T, T) -> T,
 {
-    pub fn new(size: usize, op: F, element: E, mapping: G, id: H, composite: I) -> Self {
-        let tree_size = size.next_power_of_two() * 2 - 1;
-        let value = vec![element(); tree_size];
+    pub fn new(init_value: Vec<S>, op: F, element: E, mapping: G, id: H, composite: I) -> Self {
+        let n = init_value.len().next_power_of_two();
+        let tree_size = 2 * n - 1;
+        let mut value = vec![element(); tree_size];
         let lazy = vec![id(); tree_size];
+
+        for i in 0..init_value.len() {
+            value[i + n - 1] = init_value[i];
+        }
+        for i in (0..n - 1).rev() {
+            value[i] = (op)(value[i * 2 + 1], value[i * 2 + 2]);
+        }
+
         Self {
             value,
             op,
@@ -143,15 +152,15 @@ type RangeAddMinSegTree = LazySegmentTree<
 
 #[snippet(":lazy_segment_tree")]
 impl RangeAddMinSegTree {
-    pub fn range_add_min(size: usize) -> Self {
+    pub fn range_add_min(init_value: Vec<i64>) -> Self {
         // 区間加算，区間最小
         let op = |x: i64, y: i64| std::cmp::min(x, y);
         let element = || 1_010_000_000_000_000_017;
-        let id = || 0i64;
         let mapping = |f: i64, x: i64| f + x;
+        let id = || 0i64;
         let composite = |f: i64, g: i64| f + g;
 
-        LazySegmentTree::new(size, op, element, mapping, id, composite)
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
     }
 }
 
@@ -170,7 +179,9 @@ fn test_lazy_segtree() {
         Some(_) => f,
         None => g,
     };
-    let mut segtree = LazySegmentTree::new(size, op, element, mapping, id, composite);
+
+    let init_value = vec![0; size];
+    let mut segtree = LazySegmentTree::new(init_value, op, element, mapping, id, composite);
     let mut ans = Vec::new();
     for i in 0..lr.len() {
         let (l, r) = lr[i];
@@ -187,15 +198,58 @@ fn test_lazy_segtree() {
 fn test_lazy_segtree_range_add_min() {
     let size = 10;
 
-    let mut segtree = RangeAddMinSegTree::range_add_min(size);
+    let init_value = vec![0; size];
+    let mut segtree = RangeAddMinSegTree::range_add_min(init_value);
+    println!("{:?}", segtree.value);
+    println!("{:?}", segtree.lazy);
 
     segtree.apply(1, 0, 5);
-    // segtree.apply(2, 3, 7);
-    // segtree.apply(3, 5, 10);
-    // assert_eq!(segtree.prod(0, 10), 1);
-    // assert_eq!(segtree.prod(0, 5), 1);
-    // assert_eq!(segtree.prod(5, 10), 3);
-    // assert_eq!(segtree.prod(3, 7), 3);
-    // assert_eq!(segtree.prod(0, 3), 1);
-    // assert_eq!(segtree.prod(7, 10), 3);
+    for i in 0..10 {
+        println!(
+            "segtree.prod({},{}) = {:?}",
+            i,
+            i + 1,
+            segtree.prod(i, i + 1)
+        );
+    }
+    segtree.apply(2, 3, 7);
+    for i in 0..10 {
+        println!(
+            "segtree.prod({},{}) = {:?}",
+            i,
+            i + 1,
+            segtree.prod(i, i + 1)
+        );
+    }
+    segtree.apply(3, 5, 10);
+
+    for i in 0..10 {
+        println!(
+            "segtree.prod({},{}) = {:?}",
+            i,
+            i + 1,
+            segtree.prod(i, i + 1)
+        );
+    }
+
+    println!("--------");
+
+    for i in 0..10 {
+        println!(
+            "segtree.prod({},{}) = {:?}",
+            i,
+            i + 1,
+            segtree.prod(i, i + 1)
+        );
+    }
+
+    println!("{:?}", segtree.value);
+    println!("{:?}", segtree.lazy);
+
+    assert_eq!(segtree.prod(0, 10), 1);
+    assert_eq!(segtree.prod(0, 5), 1);
+    assert_eq!(segtree.prod(5, 10), 3);
+    assert_eq!(segtree.prod(3, 7), 3);
+    assert_eq!(segtree.prod(0, 3), 1);
+    assert_eq!(segtree.prod(7, 10), 3);
 }
