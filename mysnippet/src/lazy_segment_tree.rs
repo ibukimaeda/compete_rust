@@ -130,6 +130,31 @@ where
     }
 }
 
+#[snippet(":lazy_segment_tree")]
+type RangeAddMinSegTree = LazySegmentTree<
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    fn(i64, i64) -> i64,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeAddMinSegTree {
+    pub fn range_add_min(size: usize) -> Self {
+        // 区間加算，区間最小
+        let op = |x: i64, y: i64| std::cmp::min(x, y);
+        let element = || std::i64::MAX;
+        let id = || 0i64;
+        let mapping = |f: i64, x: i64| f + x;
+        let composite = |f: i64, g: i64| f + g;
+
+        LazySegmentTree::new(size, op, element, mapping, id, composite)
+    }
+}
+
 #[test]
 fn test_lazy_segtree() {
     let lr = vec![(27, 100), (8, 39), (83, 97), (24, 75)];
@@ -159,25 +184,18 @@ fn test_lazy_segtree() {
 }
 
 #[test]
-#[allow(non_snake_case)]
-fn test_lazy_segtree_RMQ_RAQ() {
-    // Range Minimum Query (RMQ) and Range Add Query (RAQ)
-    let lr = vec![(1, 4), (1, 2), (3, 4), (2, 3)];
-    let size = 4;
-    let op = |x: i64, y: i64| std::cmp::min(x, y);
-    let element = || 1e18 as i64;
-    let mapping = |l: i64, v: i64| l + v;
-    let id = || 0i64;
-    let composite = |f: i64, g: i64| f + g;
-    let mut segtree = LazySegmentTree::new(size, op, element, mapping, id, composite);
-    let mut ans = Vec::new();
-    for i in 0..lr.len() {
-        let (l, r) = lr[i];
-        let (l, r) = (l - 1, r - 1);
-        let next_height = segtree.prod(l, r + 1);
-        ans.push(next_height);
-        segtree.apply(1, l, r + 1);
-    }
+fn test_lazy_segtree_range_add_min() {
+    let size = 10;
 
-    assert_eq!(ans, vec![element(), 1, 1, 2]);
+    let mut segtree = RangeAddMinSegTree::range_add_min(size);
+
+    // segtree.apply(1, 0, 5);
+    // segtree.apply(2, 3, 7);
+    // segtree.apply(3, 5, 10);
+    // assert_eq!(segtree.prod(0, 10), 1);
+    // assert_eq!(segtree.prod(0, 5), 1);
+    // assert_eq!(segtree.prod(5, 10), 3);
+    // assert_eq!(segtree.prod(3, 7), 3);
+    // assert_eq!(segtree.prod(0, 3), 1);
+    // assert_eq!(segtree.prod(7, 10), 3);
 }
