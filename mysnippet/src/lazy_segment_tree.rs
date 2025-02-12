@@ -363,7 +363,10 @@ impl RangeUpdateSumSegTree {
         };
         let element = || RangeSum { sum: 0, count: 0 };
         let mapping = |f: Option<i64>, x: RangeSum| RangeSum {
-            sum: f.unwrap_or(0) * x.count + x.sum,
+            sum: match f {
+                Some(val) => val * x.count,
+                None => x.sum,
+            },
             count: x.count,
         };
         let id = || None::<i64>;
@@ -415,14 +418,14 @@ fn test_lazy_segtree_range_add_min() {
     let init_value = vec![0; size];
     let mut segtree = RangeAddMinSegTree::range_add_min(init_value);
 
-    segtree.apply(1, 0, 5);
+    segtree.apply(1, 0, 2);
     segtree.apply(2, 3, 7);
     segtree.apply(3, 5, 10);
-    assert_eq!(segtree.prod(0, 10), 1);
-    assert_eq!(segtree.prod(0, 5), 1);
+    assert_eq!(segtree.prod(0, 10), 0);
+    assert_eq!(segtree.prod(0, 5), 0);
     assert_eq!(segtree.prod(5, 10), 3);
-    assert_eq!(segtree.prod(3, 7), 3);
-    assert_eq!(segtree.prod(0, 3), 1);
+    assert_eq!(segtree.prod(3, 7), 2);
+    assert_eq!(segtree.prod(0, 3), 0);
     assert_eq!(segtree.prod(7, 10), 3);
 }
 
@@ -433,13 +436,85 @@ fn test_lazy_segtree_range_add_max() {
     let init_value = vec![0; size];
     let mut segtree = RangeAddMaxSegTree::range_add_max(init_value);
 
-    segtree.apply(1, 0, 5);
+    segtree.apply(1, 0, 2);
     segtree.apply(2, 3, 7);
     segtree.apply(3, 5, 10);
     assert_eq!(segtree.prod(0, 10), 5);
-    assert_eq!(segtree.prod(0, 5), 3);
+    assert_eq!(segtree.prod(0, 5), 2);
     assert_eq!(segtree.prod(5, 10), 5);
     assert_eq!(segtree.prod(3, 7), 5);
     assert_eq!(segtree.prod(0, 3), 1);
     assert_eq!(segtree.prod(7, 10), 3);
+}
+
+#[test]
+fn test_lazy_segtree_range_add_sum() {
+    let size = 10;
+
+    let init_value = vec![0; size];
+    let mut segtree = RangeAddSumSegTree::range_add_sum(init_value);
+
+    segtree.apply(1, 0, 2);
+    segtree.apply(2, 3, 7);
+    segtree.apply(3, 5, 10);
+    assert_eq!(segtree.prod(0, 10).sum, 25);
+    assert_eq!(segtree.prod(0, 5).sum, 6);
+    assert_eq!(segtree.prod(5, 10).sum, 19);
+    assert_eq!(segtree.prod(3, 7).sum, 14);
+    assert_eq!(segtree.prod(0, 3).sum, 2);
+    assert_eq!(segtree.prod(7, 10).sum, 9);
+}
+
+#[test]
+fn test_lazy_segtree_range_update_min() {
+    let size = 10;
+
+    let init_value = vec![0; size];
+    let mut segtree = RangeUpdateMinSegTree::range_update_min(init_value);
+
+    segtree.apply(Some(1), 0, 2);
+    segtree.apply(Some(2), 3, 7);
+    segtree.apply(Some(3), 5, 10);
+    assert_eq!(segtree.prod(0, 10), 0);
+    assert_eq!(segtree.prod(0, 5), 0);
+    assert_eq!(segtree.prod(5, 10), 3);
+    assert_eq!(segtree.prod(3, 7), 2);
+    assert_eq!(segtree.prod(0, 3), 0);
+    assert_eq!(segtree.prod(7, 10), 3);
+}
+
+#[test]
+fn test_lazy_segtree_range_update_max() {
+    let size = 10;
+
+    let init_value = vec![0; size];
+    let mut segtree = RangeUpdateMaxSegTree::range_update_max(init_value);
+
+    segtree.apply(Some(1), 0, 2);
+    segtree.apply(Some(2), 3, 7);
+    segtree.apply(Some(3), 5, 10);
+    assert_eq!(segtree.prod(0, 10), 3);
+    assert_eq!(segtree.prod(0, 5), 2);
+    assert_eq!(segtree.prod(5, 10), 3);
+    assert_eq!(segtree.prod(3, 7), 3);
+    assert_eq!(segtree.prod(0, 3), 1);
+    assert_eq!(segtree.prod(7, 10), 3);
+}
+
+#[test]
+fn test_lazy_segtree_range_update_sum() {
+    let size = 10;
+
+    let init_value = vec![0; size];
+    let mut segtree = RangeUpdateSumSegTree::range_update_sum(init_value);
+
+    segtree.apply(Some(1), 0, 2);
+    segtree.apply(Some(2), 3, 7);
+    segtree.apply(Some(3), 5, 10);
+    assert_eq!(segtree.prod(0, 10).sum, 21);
+    assert_eq!(segtree.prod(0, 5).sum, 6);
+    assert_eq!(segtree.prod(5, 10).sum, 15);
+    assert_eq!(segtree.prod(3, 7).sum, 10);
+    assert_eq!(segtree.prod(0, 3).sum, 2);
+    assert_eq!(segtree.prod(7, 10).sum, 9);
 }
