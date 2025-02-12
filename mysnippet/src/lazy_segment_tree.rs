@@ -413,70 +413,10 @@ fn test_lazy_segtree_range_add_min() {
 
     let init_value = vec![0; size];
     let mut segtree = RangeAddMinSegTree2::range_add_min(init_value);
-    println!("{:?}", segtree.value);
-    println!("{:?}", segtree.lazy);
 
     segtree.apply(1, 0, 5);
-    // segtree.eval_all();
-    for i in 0..10 {
-        println!(
-            "segtree[{}] = {:?}",
-            i,
-            segtree.value[(segtree.value.len() / 2) + i]
-        );
-    }
-    println!("--------");
     segtree.apply(2, 3, 7);
-    // segtree.eval_all();
-    // for i in 0..10 {
-    //     println!(
-    //         "segtree.prod({},{}) = {:?}",
-    //         i,
-    //         i + 1,
-    //         segtree.prod(i, i + 1)
-    //     );
-    // }
-    // for i in 0..10 {
-    //     println!(
-    //         "segtree[{}] = {:?}",
-    //         i,
-    //         segtree.value[(segtree.value.len() / 2) + i]
-    //     );
-    // }
-    // println!("--------");
     segtree.apply(3, 5, 10);
-    // segtree.eval_all();
-
-    // for i in 0..10 {
-    //     println!(
-    //         "segtree.prod({},{}) = {:?}",
-    //         i,
-    //         i + 1,
-    //         segtree.prod(i, i + 1)
-    //     );
-    // }
-    // for i in 0..10 {
-    //     println!(
-    //         "segtree[{}] = {:?}",
-    //         i,
-    //         segtree.value[(segtree.value.len() / 2) + i]
-    //     );
-    // }
-
-    // println!("--------");
-
-    // for i in 0..10 {
-    //     println!(
-    //         "segtree.prod({},{}) = {:?}",
-    //         i,
-    //         i + 1,
-    //         segtree.prod(i, i + 1)
-    //     );
-    // }
-
-    // println!("{:?}", segtree.value);
-    // println!("{:?}", segtree.lazy);
-
     assert_eq!(segtree.prod(0, 10), 1);
     assert_eq!(segtree.prod(0, 5), 1);
     assert_eq!(segtree.prod(5, 10), 3);
