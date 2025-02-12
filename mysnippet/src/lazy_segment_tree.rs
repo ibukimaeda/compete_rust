@@ -72,7 +72,15 @@ where
         }
     }
 
-    pub fn _eval(&mut self, tree_index: usize, left: usize, right: usize) {
+    pub fn eval_all(&mut self) {
+        self._eval_all(0, 0, self.value.len() / 2 + 1);
+    }
+
+    pub fn get(&mut self, index: usize) -> S {
+        self.prod(index, index + 1)
+    }
+
+    fn _eval(&mut self, tree_index: usize, left: usize, right: usize) {
         // tree_index 番目のノードに対して遅延評価を行う
         if self.lazy[tree_index] == (self.id)() {
             return;
@@ -91,11 +99,7 @@ where
         self.lazy[tree_index] = (self.id)();
     }
 
-    pub fn eval_all(&mut self) {
-        self._eval_all(0, 0, self.value.len() / 2 + 1);
-    }
-
-    pub fn _eval_all(&mut self, k: usize, l: usize, r: usize) {
+    fn _eval_all(&mut self, k: usize, l: usize, r: usize) {
         self._eval(k, l, r);
         if r - l > 1 {
             let mid = (l + r) / 2;
@@ -105,7 +109,7 @@ where
         }
     }
 
-    pub fn _apply(
+    fn _apply(
         &mut self,
         v: T,
         search_left: usize,
@@ -141,11 +145,11 @@ where
         }
     }
 
-    pub fn _get_children(&self, tree_index: usize) -> (usize, usize) {
+    fn _get_children(&self, tree_index: usize) -> (usize, usize) {
         (tree_index * 2 + 1, tree_index * 2 + 2)
     }
 
-    pub fn _prod(
+    fn _prod(
         &mut self,
         search_left: usize,
         search_right: usize,
@@ -427,6 +431,10 @@ fn test_lazy_segtree_range_add_min() {
     assert_eq!(segtree.prod(3, 7), 2);
     assert_eq!(segtree.prod(0, 3), 0);
     assert_eq!(segtree.prod(7, 10), 3);
+
+    assert_eq!(segtree.get(2), 0);
+    assert_eq!(segtree.get(5), 5);
+    assert_eq!(segtree.get(7), 3);
 }
 
 #[test]
@@ -445,6 +453,10 @@ fn test_lazy_segtree_range_add_max() {
     assert_eq!(segtree.prod(3, 7), 5);
     assert_eq!(segtree.prod(0, 3), 1);
     assert_eq!(segtree.prod(7, 10), 3);
+
+    assert_eq!(segtree.get(2), 0);
+    assert_eq!(segtree.get(5), 5);
+    assert_eq!(segtree.get(7), 3);
 }
 
 #[test]
@@ -463,6 +475,10 @@ fn test_lazy_segtree_range_add_sum() {
     assert_eq!(segtree.prod(3, 7).sum, 14);
     assert_eq!(segtree.prod(0, 3).sum, 2);
     assert_eq!(segtree.prod(7, 10).sum, 9);
+
+    assert_eq!(segtree.get(2), RangeSum { sum: 0, count: 1 });
+    assert_eq!(segtree.get(5), RangeSum { sum: 5, count: 1 });
+    assert_eq!(segtree.get(7), RangeSum { sum: 3, count: 1 });
 }
 
 #[test]
@@ -481,6 +497,10 @@ fn test_lazy_segtree_range_update_min() {
     assert_eq!(segtree.prod(3, 7), 2);
     assert_eq!(segtree.prod(0, 3), 0);
     assert_eq!(segtree.prod(7, 10), 3);
+
+    assert_eq!(segtree.get(2), 0);
+    assert_eq!(segtree.get(5), 3);
+    assert_eq!(segtree.get(7), 3);
 }
 
 #[test]
@@ -499,6 +519,10 @@ fn test_lazy_segtree_range_update_max() {
     assert_eq!(segtree.prod(3, 7), 3);
     assert_eq!(segtree.prod(0, 3), 1);
     assert_eq!(segtree.prod(7, 10), 3);
+
+    assert_eq!(segtree.get(2), 0);
+    assert_eq!(segtree.get(5), 3);
+    assert_eq!(segtree.get(7), 3);
 }
 
 #[test]
@@ -517,4 +541,8 @@ fn test_lazy_segtree_range_update_sum() {
     assert_eq!(segtree.prod(3, 7).sum, 10);
     assert_eq!(segtree.prod(0, 3).sum, 2);
     assert_eq!(segtree.prod(7, 10).sum, 9);
+
+    assert_eq!(segtree.get(2), RangeSum { sum: 0, count: 1 });
+    assert_eq!(segtree.get(5), RangeSum { sum: 3, count: 1 });
+    assert_eq!(segtree.get(7), RangeSum { sum: 3, count: 1 });
 }
