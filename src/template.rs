@@ -147,7 +147,7 @@ macro_rules! debug_vec {
                 if i > 0 {
                     write!(output, ", ").unwrap();
                 }
-                write!(output, "{}", val).unwrap();
+                write!(output, "{:?}", val).unwrap();
             }
             write!(output, "]").unwrap();
             eprintln!("{}={}", stringify!($vec), output);
@@ -169,7 +169,7 @@ macro_rules! debug_vec2 {
                     if j > 0 {
                         write!(output, ", ").unwrap();
                     }
-                    write!(output, "{}", val).unwrap();
+                    write!(output, "{:?}", val).unwrap();
                 }
                 write!(output, "]\n").unwrap();
             }
