@@ -417,7 +417,7 @@ fn test_lazy_segtree_range_add_min() {
     println!("{:?}", segtree.lazy);
 
     segtree.apply(1, 0, 5);
-    segtree.eval_all();
+    // segtree.eval_all();
     for i in 0..10 {
         println!(
             "segtree[{}] = {:?}",
@@ -427,7 +427,7 @@ fn test_lazy_segtree_range_add_min() {
     }
     println!("--------");
     segtree.apply(2, 3, 7);
-    segtree.eval_all();
+    // segtree.eval_all();
     for i in 0..10 {
         println!(
             "segtree.prod({},{}) = {:?}",
@@ -445,7 +445,7 @@ fn test_lazy_segtree_range_add_min() {
     }
     println!("--------");
     segtree.apply(3, 5, 10);
-    segtree.eval_all();
+    // segtree.eval_all();
 
     for i in 0..10 {
         println!(
