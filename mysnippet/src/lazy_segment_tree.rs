@@ -1,6 +1,7 @@
 use std::vec;
 
 use cargo_snippet::snippet;
+use num::iter::Range;
 
 pub struct LazySegmentTree<S, F, E, T, G, H, I>
 where
@@ -192,12 +193,186 @@ type RangeAddMinSegTree = LazySegmentTree<
 #[snippet(":lazy_segment_tree")]
 impl RangeAddMinSegTree {
     pub fn range_add_min(init_value: Vec<i64>) -> Self {
+        // RAQ-RmQ
         // 区間加算，区間最小
+        // https://qiita.com/okateim/items/e2f4a734db4e5f90e410
+        // 区間最小の方は小文字の m を使用して Max の使い分ける
         let op = |x: i64, y: i64| std::cmp::min(x, y);
         let element = || 1_010_000_000_000_000_017;
         let mapping = |f: i64, x: i64| f + x;
         let id = || 0i64;
         let composite = |f: i64, g: i64| f + g;
+
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
+    }
+}
+
+#[snippet(":lazy_segment_tree")]
+type RangeAddMaxSegTree = LazySegmentTree<
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    fn(i64, i64) -> i64,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeAddMaxSegTree {
+    pub fn range_add_max(init_value: Vec<i64>) -> Self {
+        // RAQ-RMQ
+        // 区間加算，区間最大
+        let op = |x: i64, y: i64| std::cmp::max(x, y);
+        let element = || -1_010_000_000_000_000_017;
+        let mapping = |f: i64, x: i64| f + x;
+        let id = || 0i64;
+        let composite = |f: i64, g: i64| f + g;
+
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
+    }
+}
+
+#[snippet(":lazy_segment_tree")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct RangeSum {
+    sum: i64,
+    count: i64,
+}
+
+#[snippet(":lazy_segment_tree")]
+type RangeAddSumSegTree = LazySegmentTree<
+    RangeSum,
+    fn(RangeSum, RangeSum) -> RangeSum,
+    fn() -> RangeSum,
+    i64,
+    fn(i64, RangeSum) -> RangeSum,
+    fn() -> i64,
+    fn(i64, i64) -> i64,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeAddSumSegTree {
+    pub fn range_add_sum(init_value: Vec<i64>) -> Self {
+        // RAQ-RSQ
+        // 区間加算，区間和
+        let op = |a: RangeSum, b: RangeSum| RangeSum {
+            sum: a.sum + b.sum,
+            count: a.count + b.count,
+        };
+        let element = || RangeSum { sum: 0, count: 0 };
+        let mapping = |f: i64, x: RangeSum| RangeSum {
+            sum: f * x.count + x.sum,
+            count: x.count,
+        };
+        let id = || 0i64;
+        let composite = |f: i64, g: i64| f + g;
+
+        let init_value = init_value
+            .iter()
+            .map(|&x| RangeSum { sum: x, count: 1 })
+            .collect();
+
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
+    }
+}
+
+#[snippet(":lazy_segment_tree")]
+type RangeUpdateMinSegTree = LazySegmentTree<
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    Option<i64>,
+    fn(Option<i64>, i64) -> i64,
+    fn() -> Option<i64>,
+    fn(Option<i64>, Option<i64>) -> Option<i64>,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeUpdateMinSegTree {
+    pub fn range_update_min(init_value: Vec<i64>) -> Self {
+        // RUQ-RmQ
+        // 区間更新，区間最小
+        let op = |x: i64, y: i64| std::cmp::min(x, y);
+        let element = || 1_010_000_000_000_000_017;
+        let mapping = |f: Option<i64>, x: i64| match f {
+            Some(val) => val,
+            None => x,
+        };
+        let id = || None::<i64>;
+        let composite = |f: Option<i64>, g: Option<i64>| match f {
+            Some(_) => f,
+            None => g,
+        };
+
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
+    }
+}
+
+#[snippet(":lazy_segment_tree")]
+type RangeUpdateMaxSegTree = LazySegmentTree<
+    i64,
+    fn(i64, i64) -> i64,
+    fn() -> i64,
+    Option<i64>,
+    fn(Option<i64>, i64) -> i64,
+    fn() -> Option<i64>,
+    fn(Option<i64>, Option<i64>) -> Option<i64>,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeUpdateMaxSegTree {
+    pub fn range_update_max(init_value: Vec<i64>) -> Self {
+        // RUQ-RMQ
+        // 区間更新，区間最大
+        let op = |x: i64, y: i64| std::cmp::max(x, y);
+        let element = || -1_010_000_000_000_000_017;
+        let mapping = |f: Option<i64>, x: i64| match f {
+            Some(val) => val,
+            None => x,
+        };
+        let id = || None::<i64>;
+        let composite = |f: Option<i64>, g: Option<i64>| match f {
+            Some(_) => f,
+            None => g,
+        };
+
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
+    }
+}
+
+#[snippet(":lazy_segment_tree")]
+type RangeUpdateSumSegTree = LazySegmentTree<
+    RangeSum,
+    fn(RangeSum, RangeSum) -> RangeSum,
+    fn() -> RangeSum,
+    Option<i64>,
+    fn(Option<i64>, RangeSum) -> RangeSum,
+    fn() -> Option<i64>,
+    fn(Option<i64>, Option<i64>) -> Option<i64>,
+>;
+
+#[snippet(":lazy_segment_tree")]
+impl RangeUpdateSumSegTree {
+    pub fn range_update_sum(init_value: Vec<i64>) -> Self {
+        // RUQ-RMQ
+        // 区間更新，区間和
+        let op = |x: RangeSum, y: RangeSum| RangeSum {
+            sum: x.sum + y.sum,
+            count: x.count + y.count,
+        };
+        let element = || RangeSum { sum: 0, count: 0 };
+        let mapping = |f: Option<i64>, x: RangeSum| RangeSum {
+            sum: f.unwrap_or(0) * x.count + x.sum,
+            count: x.count,
+        };
+        let id = || None::<i64>;
+        let composite = |f: Option<i64>, g: Option<i64>| f.or(g);
+
+        let init_value = init_value
+            .iter()
+            .map(|&x| RangeSum { sum: x, count: 1 })
+            .collect();
 
         LazySegmentTree::new(init_value, op, element, mapping, id, composite)
     }
@@ -235,7 +410,6 @@ fn test_lazy_segtree() {
 
 #[test]
 fn test_lazy_segtree_range_add_min() {
-    // prod を各要素に対して呼べばテストが通る
     let size = 10;
 
     let init_value = vec![0; size];
@@ -248,6 +422,24 @@ fn test_lazy_segtree_range_add_min() {
     assert_eq!(segtree.prod(0, 5), 1);
     assert_eq!(segtree.prod(5, 10), 3);
     assert_eq!(segtree.prod(3, 7), 3);
+    assert_eq!(segtree.prod(0, 3), 1);
+    assert_eq!(segtree.prod(7, 10), 3);
+}
+
+#[test]
+fn test_lazy_segtree_range_add_max() {
+    let size = 10;
+
+    let init_value = vec![0; size];
+    let mut segtree = RangeAddMaxSegTree::range_add_max(init_value);
+
+    segtree.apply(1, 0, 5);
+    segtree.apply(2, 3, 7);
+    segtree.apply(3, 5, 10);
+    assert_eq!(segtree.prod(0, 10), 5);
+    assert_eq!(segtree.prod(0, 5), 3);
+    assert_eq!(segtree.prod(5, 10), 5);
+    assert_eq!(segtree.prod(3, 7), 5);
     assert_eq!(segtree.prod(0, 3), 1);
     assert_eq!(segtree.prod(7, 10), 3);
 }
