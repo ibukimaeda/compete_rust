@@ -2,7 +2,7 @@ use std::vec;
 
 use cargo_snippet::snippet;
 
-pub struct LazySegmentTree2<S, F, E, T, G, H, I>
+pub struct LazySegmentTree<S, F, E, T, G, H, I>
 where
     S: Copy + Eq,
     T: Copy + Eq,
@@ -22,7 +22,7 @@ where
 }
 
 #[snippet(":lazy_segment_tree")]
-impl<S, F, E, T, G, H, I> LazySegmentTree2<S, F, E, T, G, H, I>
+impl<S, F, E, T, G, H, I> LazySegmentTree<S, F, E, T, G, H, I>
 where
     S: Copy + Eq,
     T: Copy + Eq,
@@ -179,7 +179,7 @@ where
 }
 
 #[snippet(":lazy_segment_tree")]
-type RangeAddMinSegTree2 = LazySegmentTree2<
+type RangeAddMinSegTree = LazySegmentTree<
     i64,
     fn(i64, i64) -> i64,
     fn() -> i64,
@@ -190,7 +190,7 @@ type RangeAddMinSegTree2 = LazySegmentTree2<
 >;
 
 #[snippet(":lazy_segment_tree")]
-impl RangeAddMinSegTree2 {
+impl RangeAddMinSegTree {
     pub fn range_add_min(init_value: Vec<i64>) -> Self {
         // 区間加算，区間最小
         let op = |x: i64, y: i64| std::cmp::min(x, y);
@@ -199,7 +199,7 @@ impl RangeAddMinSegTree2 {
         let id = || 0i64;
         let composite = |f: i64, g: i64| f + g;
 
-        LazySegmentTree2::new(init_value, op, element, mapping, id, composite)
+        LazySegmentTree::new(init_value, op, element, mapping, id, composite)
     }
 }
 
@@ -220,7 +220,7 @@ fn test_lazy_segtree() {
     };
 
     let init_value = vec![0; size];
-    let mut segtree = LazySegmentTree2::new(init_value, op, element, mapping, id, composite);
+    let mut segtree = LazySegmentTree::new(init_value, op, element, mapping, id, composite);
     let mut ans = Vec::new();
     for i in 0..lr.len() {
         let (l, r) = lr[i];
@@ -239,7 +239,7 @@ fn test_lazy_segtree_range_add_min() {
     let size = 10;
 
     let init_value = vec![0; size];
-    let mut segtree = RangeAddMinSegTree2::range_add_min(init_value);
+    let mut segtree = RangeAddMinSegTree::range_add_min(init_value);
 
     segtree.apply(1, 0, 5);
     segtree.apply(2, 3, 7);
