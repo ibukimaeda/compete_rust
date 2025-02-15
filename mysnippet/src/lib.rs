@@ -9,4 +9,5 @@ pub mod lazy_segment_tree;
 pub mod mod_int;
 pub mod union_find;
 
+pub mod grid_astar;
 pub mod xor_shift;
