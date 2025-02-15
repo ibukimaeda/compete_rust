@@ -7,6 +7,7 @@ use proconio::{
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use std::cmp;
 use std::cmp::Reverse;
