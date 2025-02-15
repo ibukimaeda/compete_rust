@@ -31,7 +31,41 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, L:usize, a:[i64;N], b:[i64;M], cd:[(Usize1, Usize1); L]);
+
+    let mut hashed_cd = HashSet::new();
+    for (c, d) in cd {
+        hashed_cd.insert((c, d));
+    }
+
+    let mut cur = vec![0; N];
+
+    let mut itered_b = b.into_iter().enumerate().collect::<Vec<_>>();
+    itered_b.sort_by_key(|&(_, v)| -v);
+
+    debug_vec!(itered_b);
+
+    let mut pq = BinaryHeap::new();
+    for i in 0..N {
+        pq.push((a[i] + itered_b[cur[i]].1, i));
+    }
+
+    loop {
+        let (cost, i) = pq.pop().unwrap();
+
+        let j = itered_b[cur[i]].0;
+        if hashed_cd.contains(&(i, j)) {
+            cur[i] += 1;
+            if cur[i] != M {
+                pq.push((a[i] + itered_b[cur[i]].1, i));
+            }
+        } else {
+            say(cost);
+            break;
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -147,7 +181,7 @@ macro_rules! debug_vec {
                 if i > 0 {
                     write!(output, ", ").unwrap();
                 }
-                write!(output, "{}", val).unwrap();
+                write!(output, "{:?}", val).unwrap();
             }
             write!(output, "]").unwrap();
             eprintln!("{}={}", stringify!($vec), output);
@@ -366,4 +400,3 @@ where
         r.clone()
     }
 }
-

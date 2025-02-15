@@ -145,6 +145,7 @@ where
         }
     }
 
+    #[inline(always)]
     fn _get_children(&self, tree_index: usize) -> (usize, usize) {
         (tree_index * 2 + 1, tree_index * 2 + 2)
     }
