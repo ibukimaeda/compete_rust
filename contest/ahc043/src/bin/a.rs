@@ -8,6 +8,7 @@ use proconio::{
 };
 use rand::{thread_rng, Rng};
 
+use core::panic;
 use std::cmp;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
@@ -32,7 +33,7 @@ const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
 fn main() {
-    input!(N:usize, M:usize, K:usize, T:usize, st: [(usize, usize, usize, usize); M]);
+    input!(N:usize, M:usize, K:i64, T:usize, st: [(usize, usize, usize, usize); M]);
     // N = 50：区画の縦・横のマス数
     // 50 <= M <= 1600：人数
     // 11000 <= K <= 20000：初期資金
@@ -49,8 +50,66 @@ fn main() {
     //  ooo
     //   o
 
-    for i in 0..T {
-        say(-1);
+    const RAIL_COST: i64 = 100;
+    const STATION_COST: i64 = 5000;
+
+    // 資金が足りる中で一番遠い所に線路を敷く
+    // 初期資金で置けるレールの数
+    let num_rails = (K - 2 * STATION_COST) / RAIL_COST;
+    let mut farthest_idx = 0;
+    let mut farthest_dist = 0;
+    for i in 0..st.len() {
+        let dist = manhattan_distance(st[i].0, st[i].1, st[i].2, st[i].3);
+        if dist > farthest_dist && (dist - 1) <= num_rails as i64 {
+            farthest_dist = dist;
+            farthest_idx = i;
+        }
+    }
+
+    let start = (st[farthest_idx].0, st[farthest_idx].1);
+    let goal = (st[farthest_idx].2, st[farthest_idx].3);
+    let mut now_place = start;
+    let mut prev_place = (!0, !0);
+    let mut prev_direction = Direction::Nothing;
+    let mut now_time = 0;
+    while now_time < T {
+        // 現在地に移動方向を決めた後に，線路を置く・駅を置く・何もしないかを決める
+
+        // 移動方向
+        let direction = if now_place.0 > goal.0 {
+            Direction::Up
+        } else if now_place.0 < goal.0 {
+            Direction::Down
+        } else if now_place.1 > goal.1 {
+            Direction::Left
+        } else if now_place.1 < goal.1 {
+            Direction::Right
+        } else {
+            Direction::Nothing
+        };
+
+        if now_place == prev_place {
+            say_action(Action::DoNothing, &mut now_time);
+        } else if now_place == start {
+            say_action(Action::BuildStation(start.0, start.1), &mut now_time);
+        } else if now_place == goal {
+            say_action(Action::BuildStation(goal.0, goal.1), &mut now_time);
+        } else {
+            say_action(
+                Action::BuildRail(
+                    get_rail(&prev_direction, &direction),
+                    now_place.0,
+                    now_place.1,
+                ),
+                &mut now_time,
+            );
+        }
+
+        prev_place = now_place;
+        prev_direction = direction;
+        now_place = get_next_place(&now_place, &direction);
+
+        debug!(now_time, now_place, prev_place, prev_direction);
     }
 }
 
@@ -63,10 +122,81 @@ enum Rail {
     RD = 6,
 }
 
+#[derive(Debug, Clone, Copy)]
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+    Nothing,
+}
+
 enum GridType {
     Empty,
     Rail(Rail),
     Station,
+}
+
+enum Action {
+    BuildRail(Rail, usize, usize),
+    BuildStation(usize, usize),
+    DoNothing,
+}
+
+fn get_rail(prevdirection: &Direction, direction: &Direction) -> Rail {
+    match (prevdirection, direction) {
+        (Direction::Up, Direction::Up) => Rail::UD,
+        (Direction::Down, Direction::Down) => Rail::UD,
+        (Direction::Left, Direction::Left) => Rail::LR,
+        (Direction::Right, Direction::Right) => Rail::LR,
+        // 方向を変える際は prev_direction は逆方向のレールを置く
+        (Direction::Up, Direction::Left) => Rail::LD,
+        (Direction::Up, Direction::Right) => Rail::RD,
+        (Direction::Down, Direction::Left) => Rail::LU,
+        (Direction::Down, Direction::Right) => Rail::UR,
+        (Direction::Left, Direction::Up) => Rail::UR,
+        (Direction::Left, Direction::Down) => Rail::RD,
+        (Direction::Right, Direction::Up) => Rail::LU,
+        (Direction::Right, Direction::Down) => Rail::LD,
+        // (Direction::Nothing, Direction::Up) => Rail::UD,
+        // (Direction::Nothing, Direction::Down) => Rail::UD,
+        // (Direction::Nothing, Direction::Left) => Rail::LR,
+        // (Direction::Nothing, Direction::Right) => Rail::LR,
+        // (Direction::Up, Direction::Nothing) => Rail::UD,
+        // (Direction::Down, Direction::Nothing) => Rail::UD,
+        // (Direction::Left, Direction::Nothing) => Rail::LR,
+        // (Direction::Right, Direction::Nothing) => Rail::LR,
+        _ => panic!("Invalid direction"),
+    }
+}
+
+fn get_next_place(now_place: &(usize, usize), direction: &Direction) -> (usize, usize) {
+    match direction {
+        Direction::Up => (now_place.0 - 1, now_place.1),
+        Direction::Down => (now_place.0 + 1, now_place.1),
+        Direction::Left => (now_place.0, now_place.1 - 1),
+        Direction::Right => (now_place.0, now_place.1 + 1),
+        Direction::Nothing => *now_place,
+    }
+}
+
+fn say_action(action: Action, time: &mut usize) {
+    *time += 1;
+    match action {
+        Action::BuildRail(rail, x, y) => {
+            println!("{} {} {}", rail as usize, x, y);
+        }
+        Action::BuildStation(x, y) => {
+            println!("0 {} {}", x, y);
+        }
+        Action::DoNothing => {
+            println!("-1");
+        }
+    }
+}
+
+fn manhattan_distance(x1: usize, y1: usize, x2: usize, y2: usize) -> i64 {
+    (x1 as i64 - x2 as i64).abs() + (y1 as i64 - y2 as i64).abs()
 }
 
 // ###########################################################################################################
