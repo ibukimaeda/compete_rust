@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Point {
     row: usize,
@@ -11,6 +12,7 @@ struct Point {
 }
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 #[derive(Debug, PartialEq, Eq)]
 struct AstarNode {
     cost: usize,
@@ -19,6 +21,7 @@ struct AstarNode {
 }
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 impl Ord for AstarNode {
     fn cmp(&self, other: &Self) -> Ordering {
         other.priority.cmp(&self.priority)
@@ -26,6 +29,7 @@ impl Ord for AstarNode {
 }
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 impl PartialOrd for AstarNode {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -33,11 +37,13 @@ impl PartialOrd for AstarNode {
 }
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 struct AStar {
     grid: Vec<Vec<u8>>,
 }
 
 #[snippet(":grid_astar")]
+#[allow(dead_code)]
 impl AStar {
     fn new(grid: Vec<Vec<u8>>) -> Self {
         AStar { grid }

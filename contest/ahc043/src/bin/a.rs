@@ -11,6 +11,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use core::panic;
 use std::cmp;
+use std::cmp::Ordering;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::default;
@@ -61,6 +62,15 @@ fn main() {
     let mut income = 0; // 毎ターンの収入（各ターンの終了時に取得）
     let mut funds = K; // 資金
     let mut now_time = 0;
+    let mut grid = nested_vec!(GridType::Empty; N; N);
+    let mut state = State {
+        income,
+        funds,
+        now_time,
+        grid,
+        now_place: (0, 0),
+        prev_direction: Direction::Nothing,
+    };
 
     // 資金が足りる中で一番遠い所に線路を敷く
     // 初期資金で置けるレールの数
@@ -97,11 +107,11 @@ fn main() {
         };
 
         if now_place == prev_place {
-            say_action(Action::DoNothing, &mut now_time);
+            say_action(Action::DoNothing, &mut state);
         } else if now_place == start {
-            say_action(Action::BuildStation(start.0, start.1), &mut now_time);
+            say_action(Action::BuildStation(start.0, start.1), &mut state);
         } else if now_place == goal {
-            say_action(Action::BuildStation(goal.0, goal.1), &mut now_time);
+            say_action(Action::BuildStation(goal.0, goal.1), &mut state);
         } else {
             say_action(
                 Action::BuildRail(
@@ -109,7 +119,7 @@ fn main() {
                     now_place.0,
                     now_place.1,
                 ),
-                &mut now_time,
+                &mut state,
             );
         }
 
@@ -125,10 +135,12 @@ struct State {
     income: i64,
     funds: i64,
     now_time: usize,
+    grid: Vec<Vec<GridType>>,
     now_place: (usize, usize),
     prev_direction: Direction,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Rail {
     LR = 1,
     UD = 2,
@@ -147,6 +159,7 @@ enum Direction {
     Nothing,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum GridType {
     Empty,
     Rail(Rail),
@@ -196,8 +209,8 @@ fn get_next_place(now_place: &(usize, usize), direction: &Direction) -> (usize, 
     }
 }
 
-fn say_action(action: Action, time: &mut usize) {
-    *time += 1;
+fn say_action(action: Action, state: &mut State) {
+    state.now_time += 1;
     match action {
         Action::BuildRail(rail, x, y) => {
             println!("{} {} {}", rail as usize, x, y);
@@ -213,6 +226,137 @@ fn say_action(action: Action, time: &mut usize) {
 
 fn manhattan_distance(x1: usize, y1: usize, x2: usize, y2: usize) -> i64 {
     (x1 as i64 - x2 as i64).abs() + (y1 as i64 - y2 as i64).abs()
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct Point {
+    row: usize,
+    col: usize,
+}
+#[allow(dead_code)]
+#[derive(Debug, PartialEq, Eq)]
+struct AstarNode {
+    cost: usize,
+    position: Point,
+    priority: usize,
+}
+#[allow(dead_code)]
+impl Ord for AstarNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.priority.cmp(&self.priority)
+    }
+}
+#[allow(dead_code)]
+impl PartialOrd for AstarNode {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+#[allow(dead_code)]
+struct AStar {}
+
+#[allow(dead_code)]
+impl AStar {
+    fn new() -> Self {
+        AStar {}
+    }
+
+    fn _heuristic(a: Point, b: Point) -> usize {
+        (a.row as isize - b.row as isize).abs() as usize
+            + (a.col as isize - b.col as isize).abs() as usize
+    }
+
+    fn astar(&self, start: Point, goal: Point, state: &State) -> Option<FxHashMap<Point, Point>> {
+        let mut open_set = BinaryHeap::new();
+        let mut came_from: FxHashMap<Point, Point> = FxHashMap::default();
+        let mut g_score: FxHashMap<Point, usize> = FxHashMap::default();
+        g_score.insert(start, 0);
+        open_set.push(AstarNode {
+            cost: 0,
+            position: start,
+            priority: Self::_heuristic(start, goal),
+        });
+        let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+        while let Some(AstarNode { position, .. }) = open_set.pop() {
+            if position == goal {
+                // let mut path = vec![position];
+                // while let Some(&prev) = came_from.get(&path[0]) {
+                //     path.insert(0, prev);
+                // }
+                // return Some(path);
+                return Some(came_from);
+            }
+            let current_cost = *g_score.get(&position).unwrap_or(&usize::MAX);
+            for (dx, dy) in directions.iter() {
+                let new_x = position.row as isize + dx;
+                let new_y = position.col as isize + dy;
+                if new_x < 0 || new_y < 0 {
+                    continue;
+                }
+                let new_x = new_x as usize;
+                let new_y = new_y as usize;
+                if new_x >= state.grid.len()
+                    || new_y >= state.grid[0].len()
+                    || state.grid[new_x][new_y] != GridType::Empty
+                {
+                    continue;
+                }
+                let new_pos = Point {
+                    row: new_x,
+                    col: new_y,
+                };
+                let tentative_g_score = current_cost + 1;
+                if tentative_g_score < *g_score.get(&new_pos).unwrap_or(&usize::MAX) {
+                    came_from.insert(new_pos, position);
+                    g_score.insert(new_pos, tentative_g_score);
+                    let priority = tentative_g_score + Self::_heuristic(new_pos, goal);
+                    open_set.push(AstarNode {
+                        cost: tentative_g_score,
+                        position: new_pos,
+                        priority,
+                    });
+                }
+            }
+        }
+        None
+    }
+
+    fn find_path(&self, start: Point, goal: Point, state: &State) -> Option<Vec<Point>> {
+        let came_from = self.astar(start, goal, state)?;
+        let mut path = vec![goal];
+        let mut current = goal;
+        // TODO もう少し効率的に書く
+        while current != start {
+            current = *came_from.get(&current).unwrap();
+            path.push(current);
+        }
+        path.reverse();
+        Some(path)
+    }
+
+    fn find_path_direction(
+        &self,
+        start: Point,
+        goal: Point,
+        state: &State,
+    ) -> Option<Vec<Direction>> {
+        let path = self.find_path(start, goal, state)?;
+        let mut directions = vec![];
+        for i in 0..path.len() - 1 {
+            let current = path[i];
+            let next = path[i + 1];
+            if current.row < next.row {
+                directions.push(Direction::Down);
+            } else if current.row > next.row {
+                directions.push(Direction::Up);
+            } else if current.col < next.col {
+                directions.push(Direction::Right);
+            } else if current.col > next.col {
+                directions.push(Direction::Left);
+            }
+        }
+        Some(directions)
+    }
 }
 
 // ###########################################################################################################
