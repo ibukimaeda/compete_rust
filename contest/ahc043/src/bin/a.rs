@@ -7,6 +7,7 @@ use proconio::{
     marker::{Chars, Isize1, Usize1},
 };
 use rand::{thread_rng, Rng};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use core::panic;
 use std::cmp;
@@ -53,6 +54,14 @@ fn main() {
     const RAIL_COST: i64 = 100;
     const STATION_COST: i64 = 5000;
 
+    // 適当に初期の駅を2つ置く
+    // 家または会社が駅の範囲にあるものの中で最も遠いものを選ぶ
+    // その駅から家または会社までの距離が 2 以下になるように線路を敷く
+
+    let mut income = 0; // 毎ターンの収入（各ターンの終了時に取得）
+    let mut funds = K; // 資金
+    let mut now_time = 0;
+
     // 資金が足りる中で一番遠い所に線路を敷く
     // 初期資金で置けるレールの数
     let num_rails = (K - 2 * STATION_COST) / RAIL_COST;
@@ -71,7 +80,6 @@ fn main() {
     let mut now_place = start;
     let mut prev_place = (!0, !0);
     let mut prev_direction = Direction::Nothing;
-    let mut now_time = 0;
     while now_time < T {
         // 現在地に移動方向を決めた後に，線路を置く・駅を置く・何もしないかを決める
 
@@ -111,6 +119,14 @@ fn main() {
 
         debug!(now_time, now_place, prev_place, prev_direction);
     }
+}
+
+struct State {
+    income: i64,
+    funds: i64,
+    now_time: usize,
+    now_place: (usize, usize),
+    prev_direction: Direction,
 }
 
 enum Rail {
