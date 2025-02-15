@@ -31,7 +31,45 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, K:usize, T:usize, st: [(usize, usize, usize, usize); M]);
+    // N = 50：区画の縦・横のマス数
+    // 50 <= M <= 1600：人数
+    // 11000 <= K <= 20000：初期資金
+    // T = 800：ターン数
+    // 線路設置：100
+    // 駅設置：  5000
+    // 各ターン：線路設置 or 駅設置 or 何もしない
+    // 距離はマンハッタン距離
+    // 会社までの距離は 5 以上
+    // 利用されるのは家と会社両方で距離が 2 以下
+    //   o
+    //  ooo
+    // ooHoo
+    //  ooo
+    //   o
+
+    for i in 0..T {
+        say(-1);
+    }
+}
+
+enum Rail {
+    LR = 1,
+    UD = 2,
+    LD = 3,
+    LU = 4,
+    UR = 5,
+    RD = 6,
+}
+
+enum GridType {
+    Empty,
+    Rail(Rail),
+    Station,
+}
+
+// ###########################################################################################################
 
 #[allow(dead_code)]
 fn yes() {
@@ -366,4 +404,3 @@ where
         r.clone()
     }
 }
-

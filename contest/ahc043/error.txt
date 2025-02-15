@@ -1,0 +1,47 @@
+warning: unused variable: `N`
+  --> contest\ahc043\src/bin/a.rs:35:12
+   |
+35 |     input!(N:usize, M:usize, K:usize, T:usize, st: [(Usize1,Usize1,Usize1,Usize1); M]);
+   |            ^ help: if this is intentional, prefix it with an underscore: `_N`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `K`
+  --> contest\ahc043\src/bin/a.rs:35:30
+   |
+35 |     input!(N:usize, M:usize, K:usize, T:usize, st: [(Usize1,Usize1,Usize1,Usize1); M]);
+   |                              ^ help: if this is intentional, prefix it with an underscore: `_K`
+
+warning: unused variable: `st`
+  --> contest\ahc043\src/bin/a.rs:35:48
+   |
+35 |     input!(N:usize, M:usize, K:usize, T:usize, st: [(Usize1,Usize1,Usize1,Usize1); M]);
+   |                                                ^^ help: if this is intentional, prefix it with an underscore: `_st`
+
+warning: unused variable: `i`
+  --> contest\ahc043\src/bin/a.rs:52:9
+   |
+52 |     for i in 0..T {
+   |         ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: enum `Rail` is never used
+  --> contest\ahc043\src/bin/a.rs:57:6
+   |
+57 | enum Rail {
+   |      ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: enum `GridType` is never used
+  --> contest\ahc043\src/bin/a.rs:66:6
+   |
+66 | enum GridType {
+   |      ^^^^^^^^
+
+warning: `ahc043` (bin "ahc043-a") generated 6 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running `D:\workspace\atcoder\contest\../target\debug\ahc043-a.exe`
+thread 'main' panicked at C:\Users\owner\.cargo\registry\src\index.crates.io-6f17d22bba15001f\proconio-0.4.5\src\marker.rs:42:14:
+attempted to read the value 0 as a Usize1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `D:\workspace\atcoder\contest\../target\debug\ahc043-a.exe` (exit code: 101)
