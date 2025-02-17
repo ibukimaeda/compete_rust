@@ -32,7 +32,22 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S:Chars);
+
+    let mut ans = 0;
+    for i in 0..S.len() {
+        for j in i + 1..S.len() {
+            for k in j + 1..S.len() {
+                if j - i == k - j && S[i] == 'A' && S[j] == 'B' && S[k] == 'C' {
+                    ans += 1;
+                }
+            }
+        }
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -367,4 +382,3 @@ where
         r.clone()
     }
 }
-

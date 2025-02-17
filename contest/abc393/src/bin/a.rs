@@ -32,7 +32,19 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S: Chars, S2: Chars);
+
+    if S[0] == 's' && S2[0] == 's' {
+        say(1);
+    } else if S[0] == 's' && S2[0] == 'f' {
+        say(2);
+    } else if S[0] == 'f' && S2[0] == 's' {
+        say(3);
+    } else {
+        say(4);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -367,4 +379,3 @@ where
         r.clone()
     }
 }
-

@@ -1,8 +1,9 @@
 use cargo_snippet::snippet;
 
-#[allow(dead_code)]
 #[snippet(":updated_coordinate")]
+#[allow(dead_code)]
 #[allow(non_snake_case)]
+#[inline(always)]
 fn is_in(now: (usize, usize), dx: i64, dy: i64, H: usize, W: usize) -> bool {
     let H = H as i64;
     let W = W as i64;
@@ -27,9 +28,10 @@ fn test_is_in() {
     assert_eq!(is_in((0, 0), 3, 0, 3, 3), false);
 }
 
-#[allow(dead_code)]
 #[snippet(":updated_coordinate")]
+#[allow(dead_code)]
 #[allow(non_snake_case)]
+#[inline(always)]
 fn updated_coordinate(
     x: usize,
     y: usize,

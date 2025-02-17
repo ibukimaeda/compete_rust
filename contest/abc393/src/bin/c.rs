@@ -32,7 +32,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, uv:[(Usize1, Usize1);M]);
+
+    let mut graph = vec![FxHashSet::default(); N];
+
+    let mut ans = 0;
+    for (u, v) in uv {
+        if u == v {
+            ans += 1;
+        } else if graph[u].contains(&v) {
+            ans += 1;
+        } else {
+            graph[u].insert(v);
+            graph[v].insert(u);
+        }
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -367,4 +385,3 @@ where
         r.clone()
     }
 }
-

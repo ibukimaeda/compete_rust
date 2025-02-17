@@ -32,7 +32,47 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S:Chars);
+
+    let mut pos1 = vec![];
+    for i in 0..N {
+        if S[i] == '1' {
+            pos1.push(i);
+        }
+    }
+
+    let mut cumsum0 = vec![0; N + 1];
+    for i in 0..N {
+        cumsum0[i + 1] = cumsum0[i] + if S[i] == '0' { 1 } else { 0 };
+    }
+
+    let mut cumsum_cumsum0 = vec![0; pos1.len() + 1];
+    for i in 0..pos1.len() {
+        cumsum_cumsum0[i + 1] = cumsum_cumsum0[i] + cumsum0[pos1[i] + 1];
+    }
+
+    debug_vec!(pos1);
+    debug_vec!(cumsum0);
+    debug_vec!(cumsum_cumsum0);
+
+    let mut ans = INF;
+    for i in 0..N {
+        let l = pos1.partition_point(|&x| x < i);
+
+        let num1_left = l as i64;
+        let num1_right = (pos1.len() - l) as i64;
+
+        let left = num1_left * cumsum0[i] - cumsum_cumsum0[l];
+        let right = cumsum_cumsum0[pos1.len()] - cumsum_cumsum0[l] - num1_right * cumsum0[i];
+
+        debug!(i, l, num1_left, num1_right, left, right);
+
+        chmin!(ans, left as i64 + right as i64);
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -367,4 +407,3 @@ where
         r.clone()
     }
 }
-

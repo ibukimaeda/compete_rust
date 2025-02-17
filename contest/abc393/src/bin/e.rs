@@ -32,7 +32,51 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, A:[usize; N]);
+
+    let mut fact = vec![];
+    fact.reserve(N);
+    for i in 0..N {
+        fact.push(integer_factorization(A[i]));
+    }
+    debug_vec!(fact);
+
+    let mut num_fact = FxHashMap::default();
+    for i in 0..N {
+        for (k, v) in fact[i].iter() {
+            (*num_fact.entry(*k).or_insert(vec![0; 20]))[*v] += 1;
+        }
+    }
+
+    debug!(num_fact);
+
+    // num_fact について reverse cumsum を取る
+    for (_, v) in num_fact.iter_mut() {
+        for i in (0..19).rev() {
+            v[i] += v[i + 1];
+        }
+    }
+}
+
+pub fn integer_factorization(mut n: usize) -> FxHashMap<usize, usize> {
+    let mut map = FxHashMap::default();
+
+    let mut i = 2;
+    while i * i <= n {
+        while n % i == 0 {
+            *map.entry(i).or_insert(0) += 1;
+            n /= i;
+        }
+        i += 1;
+    }
+
+    if n != 0 && n != 1 {
+        *map.entry(n).or_insert(0) += 1;
+    }
+
+    map
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -367,4 +411,3 @@ where
         r.clone()
     }
 }
-
