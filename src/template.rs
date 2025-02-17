@@ -16,6 +16,7 @@ use std::default;
 use std::fmt;
 use std::mem;
 use std::ops;
+use std::time::Instant;
 use std::vec;
 
 #[allow(dead_code)]
@@ -133,6 +134,14 @@ macro_rules! debug {
     ($($a:expr),* $(,)*) => {
         #[cfg(debug_assertions)]
         eprintln!(concat!($("| ", stringify!($a), "={:?} "),*, "|"), $(&$a),*);
+    };
+}
+
+#[macro_export]
+macro_rules! debug_with_message {
+    ($msg:expr $(, $a:expr)* $(,)*) => {
+        #[cfg(debug_assertions)]
+        eprintln!(concat!("| ", $msg, " |", $(" ", stringify!($a), "={:?} |"),*), $(&$a),*);
     };
 }
 
