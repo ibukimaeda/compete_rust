@@ -1049,6 +1049,25 @@
       "}"
     ]
   },
+  ":timer": {
+    "scope": "rust",
+    "prefix": ":timer",
+    "body": [
+      "macro_rules! timer {",
+      "    (\\$ x : expr ) => {{",
+      "        let start = Instant::now();",
+      "        let result = \\$x;",
+      "        let end = start.elapsed();",
+      "        println!(",
+      "            \"計測開始から{}.{:03}秒経過しました。\",",
+      "            end.as_secs(),",
+      "            end.subsec_nanos() / 1_000_000",
+      "        );",
+      "        result",
+      "    }};",
+      "}"
+    ]
+  },
   ":union_find": {
     "scope": "rust",
     "prefix": ":union_find",
@@ -1215,25 +1234,6 @@
       "#[allow(dead_code)]",
       "fn lcm(a: u64, b: u64) -> u64 {",
       "    a / gcd(a, b) * b",
-      "}"
-    ]
-  },
-  "timer": {
-    "scope": "rust",
-    "prefix": "timer",
-    "body": [
-      "macro_rules! timer {",
-      "    (\\$ x : expr ) => {{",
-      "        let start = Instant::now();",
-      "        let result = \\$x;",
-      "        let end = start.elapsed();",
-      "        println!(",
-      "            \"計測開始から{}.{:03}秒経過しました。\",",
-      "            end.as_secs(),",
-      "            end.subsec_nanos() / 1_000_000",
-      "        );",
-      "        result",
-      "    }};",
       "}"
     ]
   }

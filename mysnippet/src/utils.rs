@@ -1,6 +1,6 @@
 use cargo_snippet::snippet;
 
-#[snippet("timer")]
+#[snippet(":timer")]
 macro_rules! timer {
     ( $x:expr) => {{
         let start = Instant::now();
