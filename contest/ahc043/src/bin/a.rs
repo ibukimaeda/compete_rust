@@ -18,6 +18,7 @@ use std::default;
 use std::fmt;
 use std::mem;
 use std::ops;
+use std::time::Instant;
 use std::vec;
 
 #[allow(dead_code)]
@@ -71,13 +72,20 @@ fn main() {
     let num_rails = (K - 2 * STATION_COST) / RAIL_COST;
     let mut farthest = (Point { row: 0, col: 0 }, Point { row: 0, col: 0 });
     let mut farthest_dist = 0;
-    for (&k, &(v, _)) in state.home_to_work_place.iter() {
-        let dist = manhattan_distance(k, v);
-        if dist > farthest_dist && (dist - 1) <= num_rails as i64 {
-            farthest_dist = dist;
-            farthest = (k, v);
+    for (&home, v) in state.home_to_work_place.iter() {
+        for &(work, _) in v {
+            let dist = manhattan_distance(home, work);
+            if dist > farthest_dist && (dist - 1) <= num_rails as i64 {
+                farthest_dist = dist;
+                farthest = (home, work);
+            }
         }
     }
+
+    debug_assert_ne!(
+        farthest,
+        (Point { row: 0, col: 0 }, Point { row: 0, col: 0 })
+    );
 
     debug!(farthest);
 
@@ -90,7 +98,10 @@ fn main() {
 
     state.laying(start, goal, &path);
 
-    while state.now_time() < 400 {
+    // state.say_answer();
+    // return;
+
+    while state.now_time() < 400 || (state.income > 150 && state.now_time() < 600) {
         // 全探索して，最も効果的なレールを敷く
 
         let mut candidates = LimitedIntervalHeap::new(5);
@@ -119,7 +130,22 @@ fn main() {
             }
 
             for (&station, _) in &state.stations {
-                let gap = tuukin_kyori - manhattan_distance(station, goal);
+                let dist = manhattan_distance(station, goal);
+                let gap = tuukin_kyori - dist;
+
+                let permissible_turn = 400;
+                // ターン以内に建築できないものは無視（距離だけで概算）
+                if RAIL_COST * (dist - 1) + STATION_COST
+                    > state.funds + state.income * permissible_turn
+                {
+                    debug!(
+                        RAIL_COST * (dist - 1) + STATION_COST,
+                        state.funds + state.income * permissible_turn,
+                        state.funds,
+                        state.income
+                    );
+                    continue;
+                }
 
                 candidates.push((gap, station, goal));
             }
@@ -148,21 +174,21 @@ fn main() {
 }
 
 struct State {
-    N: usize,                                             // 区画の縦・横のマス数
-    M: usize,                                             // 人数
-    T: usize,                                             // ターン数
-    st: Vec<(Point, Point)>,                              // 家と会社の位置
+    N: usize,                                                  // 区画の縦・横のマス数
+    M: usize,                                                  // 人数
+    T: usize,                                                  // ターン数
+    st: Vec<(Point, Point)>,                                   // 家と会社の位置
     income: i64,               // 毎ターンの収入（各ターンの終了時に取得）
     funds: i64,                // 資金
     grid: Vec<Vec<GridType>>,  // グリッドの状態
     now_place: Point,          // 現在地
     prev_direction: Direction, // 前回の移動方向
     commuters: UnionFind, // 通勤者の情報（家と会社が同じ路線につながっているか） i が家，i+M が会社
-    home_to_work_place: FxHashMap<Point, (Point, usize)>, // 家 -> (会社, 2i)
-    work_to_home_place: FxHashMap<Point, (Point, usize)>, // 会社 -> (家, i)
+    home_to_work_place: FxHashMap<Point, Vec<(Point, usize)>>, // 家 -> (会社, 2i)
+    work_to_home_place: FxHashMap<Point, Vec<(Point, usize)>>, // 会社 -> (家, i)
     near_station: FxHashMap<Point, Point>, // 家・会社に最も近い駅の位置
     stations: FxHashMap<Point, usize>, // 駅の番号 k (> 2*M)
-    actions: Vec<Action>, // 行動
+    actions: Vec<(Action, i64)>, // 行動
 }
 
 impl State {
@@ -201,11 +227,17 @@ impl State {
         // k 番目(0 始まり)に作られた駅は M + k - 1
 
         let commuters = UnionFind::new(2 * M + 100); // 100 駅以上作るようになれば，変更する
-        let mut work_place = FxHashMap::default();
-        let mut home_place = FxHashMap::default();
+        let mut home_to_work_place = FxHashMap::default();
+        let mut work_to_home_place = FxHashMap::default();
         for (i, &(x1, y1, x2, y2)) in st.iter().enumerate() {
-            work_place.insert(Point { row: x1, col: y1 }, (Point { row: x2, col: y2 }, i));
-            home_place.insert(Point { row: x2, col: y2 }, (Point { row: x1, col: y1 }, i));
+            home_to_work_place
+                .entry(Point { row: x1, col: y1 })
+                .or_insert(vec![])
+                .push((Point { row: x2, col: y2 }, i));
+            work_to_home_place
+                .entry(Point { row: x2, col: y2 })
+                .or_insert(vec![])
+                .push((Point { row: x1, col: y1 }, i));
         }
 
         State {
@@ -222,8 +254,8 @@ impl State {
             now_place: Point { row: !0, col: !0 },
             prev_direction: Direction::Nothing,
             commuters,
-            home_to_work_place: work_place,
-            work_to_home_place: home_place,
+            home_to_work_place,
+            work_to_home_place,
             near_station: FxHashMap::default(),
             stations: FxHashMap::default(),
             actions: vec![],
@@ -234,8 +266,8 @@ impl State {
         // start -> goal までのパスを敷設する
         // start には駅が設置されてあるとして敷設する
 
-        debug!("laying: ", start, goal, path);
-        assert!(path.len() > 0);
+        debug_with_message!("laying: ", start, goal, path);
+        debug_assert!(path.len() > 0);
 
         self.prev_direction = path[0];
         self.now_place = get_next_place(&start, &self.prev_direction);
@@ -252,14 +284,16 @@ impl State {
             self.prev_direction = direction;
             self.now_place = next_place;
         }
+        debug_with_message!("laying: ", self.now_place, goal);
 
-        assert_eq!(self.now_place, goal);
+        debug_assert_eq!(self.now_place, goal);
         self.action_with_wait(Action::BuildStation(self.now_place));
 
         let start_station_number = self.stations.get(&start).unwrap();
         let goal_station_number = self.stations.get(&goal).unwrap();
         self.commuters
             .unite(*start_station_number, *goal_station_number);
+        debug_with_message!("unite", *start_station_number, *goal_station_number);
 
         self.update_income();
     }
@@ -270,6 +304,7 @@ impl State {
 
         let mut funds = self.funds;
         while funds < require_cost {
+            debug_assert!(self.income > 0, "No income");
             require_turn += 1;
             funds += self.income;
         }
@@ -278,19 +313,24 @@ impl State {
     }
 
     fn update_income(&mut self) {
-        debug!("update_income: ", self.now_time());
         self.income = 0;
-        for (&home, &(work, i)) in &self.home_to_work_place {
-            if self.commuters.is_same(i, i + self.M) {
-                let home_station = self.near_station.get(&home).unwrap();
-                let work_station = self.near_station.get(&work).unwrap();
-
-                self.income += manhattan_distance(*home_station, *work_station);
+        for (&home, works) in &self.home_to_work_place {
+            for &(work, i) in works {
+                if self.commuters.is_same(i, i + self.M) {
+                    self.income += manhattan_distance(home, work);
+                }
             }
         }
+        debug_with_message!("update_income: ", self.income);
     }
 
     fn action_with_wait(&mut self, action: Action) {
+        debug_with_message!(
+            "start action_with_wait: ",
+            self.funds,
+            self.income,
+            self.now_time()
+        );
         let require_funds = match action {
             Action::BuildRail(_, _) => RAIL_COST,
             Action::BuildStation(_) => STATION_COST,
@@ -298,10 +338,11 @@ impl State {
         };
 
         while require_funds > self.funds {
+            assert!(self.income > 0, "No income");
             self.action(Action::DoNothing);
         }
 
-        debug!(
+        debug_with_message!(
             "action_with_wait: ",
             require_funds,
             self.funds,
@@ -315,10 +356,12 @@ impl State {
     fn action(&mut self, action: Action) {
         match action {
             Action::BuildRail(rail, Point { row, col }) => {
+                debug_assert!(self.funds >= RAIL_COST);
                 self.funds -= RAIL_COST;
                 self.grid[row][col] = GridType::Rail(rail);
             }
             Action::BuildStation(Point { row, col }) => {
+                debug_assert!(self.funds >= STATION_COST);
                 self.funds -= STATION_COST;
                 self.grid[row][col] = GridType::Station;
 
@@ -327,20 +370,30 @@ impl State {
 
                 for &(drow, dcol) in &Self::STATION_NEAR {
                     // TODO 駅の範囲がかぶっている場合，上書きされるのをどうするか
+                    debug_with_message!("action: ", row, col, drow, dcol);
                     if let Some((nx, ny)) = updated_coordinate(row, col, drow, dcol, self.N, self.N)
                     {
-                        if let Some((_, i)) =
+                        if let Some(works) =
                             self.home_to_work_place.get(&Point { row: nx, col: ny })
                         {
-                            self.near_station
-                                .insert(Point { row: nx, col: ny }, Point { row, col });
-                            self.commuters.unite(*i, station_number);
-                        } else if let Some((_, i)) =
+                            for &(_, i) in works {
+                                self.near_station
+                                    .insert(Point { row: nx, col: ny }, Point { row, col });
+                                self.commuters.unite(i, station_number);
+                                debug_with_message!("unite: ", i, station_number);
+                            }
+                        }
+
+                        if let Some(homes) =
                             self.work_to_home_place.get(&Point { row: nx, col: ny })
                         {
-                            self.near_station
-                                .insert(Point { row: nx, col: ny }, Point { row, col });
-                            self.commuters.unite(*i + self.M, station_number);
+                            for &(_, i) in homes {
+                                debug_with_message!("home: ", i, station_number);
+                                self.near_station
+                                    .insert(Point { row: nx, col: ny }, Point { row, col });
+                                self.commuters.unite(i + self.M, station_number);
+                                debug_with_message!("unite: ", i + self.M, station_number, i);
+                            }
                         }
                     }
                 }
@@ -350,18 +403,18 @@ impl State {
             Action::DoNothing => {}
         }
 
-        self.actions.push(action);
         self.funds += self.income;
+        self.actions.push((action, self.funds));
     }
 
     fn say_answer(&mut self) {
-        assert!(
+        debug_assert!(
             self.now_time() <= self.T,
             "Too many actions: {}",
             self.now_time()
         );
 
-        for action in &self.actions {
+        for (action, funds) in &self.actions {
             match *action {
                 Action::BuildRail(rail, Point { row, col }) => {
                     println!("{} {} {}", rail as usize, row, col);
@@ -373,6 +426,8 @@ impl State {
                     println!("-1");
                 }
             }
+
+            println!("# funds = {}", funds);
         }
 
         for _ in self.now_time()..self.T {
@@ -1056,6 +1111,14 @@ macro_rules! chmax {
 }
 
 #[macro_export]
+macro_rules! debug_with_message {
+    ($msg:expr $(, $a:expr)* $(,)*) => {
+        #[cfg(debug_assertions)]
+        eprintln!(concat!("| ", $msg, " |", $(" ", stringify!($a), "={:?} |"),*), $(&$a),*);
+    };
+}
+
+#[macro_export]
 macro_rules! debug {
     ($($a:expr),* $(,)*) => {
         #[cfg(debug_assertions)]
@@ -1293,4 +1356,19 @@ where
         let r = self.0.borrow();
         r.clone()
     }
+}
+
+#[macro_export]
+macro_rules! timer {
+    ($ x : expr ) => {{
+        let start = Instant::now();
+        let result = $x;
+        let end = start.elapsed();
+        eprintln!(
+            "計測開始から{}.{:03}秒経過しました。",
+            end.as_secs(),
+            end.subsec_nanos() / 1_000_000
+        );
+        result
+    }};
 }

@@ -1,6 +1,9 @@
+use std::time::Instant;
+
 use cargo_snippet::snippet;
 
 #[snippet(":timer")]
+#[macro_export]
 macro_rules! timer {
     ( $x:expr) => {{
         let start = Instant::now();
