@@ -33,7 +33,9 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    let a = 1 * 2 * 3;
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +378,3 @@ where
         r.clone()
     }
 }
-
