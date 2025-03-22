@@ -33,7 +33,31 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[i64;N]);
+
+    let mut left = FxHashMap::default();
+    let mut right = FxHashMap::default();
+
+    *left.entry(A[0]).or_insert(0) += 1;
+    for i in 1..N {
+        *right.entry(A[i]).or_insert(0) += 1;
+    }
+
+    let mut ans = left.len() + right.len();
+    for i in 1..N {
+        *left.entry(A[i]).or_insert(0) += 1;
+
+        *right.entry(A[i]).or_insert(1) -= 1;
+        if right[&A[i]] == 0 {
+            right.remove(&A[i]);
+        }
+
+        chmax!(ans, left.len() + right.len());
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +400,3 @@ where
         r.clone()
     }
 }
-

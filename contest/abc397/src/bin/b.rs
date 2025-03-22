@@ -33,7 +33,40 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(S:Chars);
+
+    let mut ans = 0;
+    let mut now = 0;
+
+    while now < S.len() {
+        // o 始まりは1つ進める
+        // i 始まりについて
+        // 1. 次が o なら2つ進める
+        // 2. 次が i なら1つ進める
+        if S[now] == 'o' {
+            now += 1;
+            ans +=1;
+            continue;
+        }
+
+        // 以降 S[now] == 'i'
+        if now == S.len() - 1 {
+            ans +=1;
+            break;
+        }
+
+        if S[now + 1] == 'o' {
+            now += 2;
+            continue;
+        }else {
+            ans += 1;
+            now += 1;
+            continue;
+        }
+    }
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {

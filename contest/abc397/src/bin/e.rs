@@ -32,8 +32,117 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+#[derive(Debug, Clone)]
+struct Node {
+    parent: usize,
+    children: FxHashSet<usize>,
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, uv:[(Usize1,Usize1);N*K-1]);
+
+    let mut graph = vec![FxHashSet::default(); N * K];
+    for (u, v) in uv {
+        graph[u].insert(v);
+        graph[v].insert(u);
+    }
+    let mut tree = vec![
+        Node {
+            parent: !0,
+            children: FxHashSet::default()
+        };
+        N * K
+    ];
+
+    // 木を作る
+    let mut stack = vec![(0, !0)];
+    while let Some((current, parent)) = stack.pop() {
+        tree[current].parent = parent;
+        for &next in &graph[current] {
+            if next == parent {
+                continue;
+            }
+            tree[current].children.insert(next);
+            stack.push((next, current));
+        }
+    }
+
+    // チェインの長さ
+    // K になれば終了
+    let mut weight = vec![1; N * K];
+    let mut leafs = vec![];
+
+    for i in 1..N * K {
+        if tree[i].children.is_empty() {
+            leafs.push(i);
+        }
+    }
+
+    debug!(leafs);
+
+    while let Some(leaf) = leafs.pop() {
+        // leaf と parent をつなげる
+
+        let parent = tree[leaf].parent;
+
+        debug!(tree);
+        debug!(leafs, leaf, parent);
+
+        if parent == !0 {
+            // 親なし
+            debug!("親なし");
+            no();
+            return;
+        }
+
+        tree[parent].children.remove(&leaf);
+        debug!(graph);
+
+        if weight[parent] != 1 {
+            // すでにつながっている
+            // もうこれ以上繋げられないので K 以外なら失敗
+            if weight[parent] + weight[leaf] != K {
+                debug!(weight[parent] + weight[leaf]);
+                no();
+                return;
+            }
+        }
+
+        weight[parent] += weight[leaf];
+        debug!(weight);
+        if weight[parent] > K {
+            debug!(weight[parent]);
+            no();
+            return;
+        }
+
+        if weight[parent] == K {
+            // parent も消えるので，つながっているものから消す
+
+            let grand_parent = tree[parent].parent;
+            if grand_parent != !0 {
+                tree[grand_parent].children.remove(&parent);
+                if tree[grand_parent].children.is_empty() {
+                    leafs.push(grand_parent);
+                }
+            }
+
+            let children = tree[parent].children.clone();
+            for &child in &children {
+                tree[child].parent = !0;
+            }
+        }
+
+        if parent != 0 && graph[parent].len() == 1 {
+            leafs.push(parent);
+        }
+    }
+
+    debug!(weight);
+
+    yes();
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +485,3 @@ where
         r.clone()
     }
 }
-

@@ -33,7 +33,17 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(X:f64);
+
+    if X < 37.5 {
+        say(3);
+    }else if 37.5 <= X && X < 38.0 {
+        say(2);
+    }else if 38.0 <= X {
+        say(1);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {

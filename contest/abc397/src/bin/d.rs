@@ -33,7 +33,46 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:u128);
+
+    // d = x - y
+    let max_d = (4.0 * N as f64).powf(1.0 / 3.0) as u128 + 3;
+
+    for d in 1..=max_d {
+        let d3 = d.pow(3);
+        if d3 > 4 * N {
+            break;
+        }
+
+        // 判別式 3*d(4N - d^3) が平方数かどうか
+        let discriminant = 3 * d * (4 * N - d3);
+        let sqrt_discriminant = (discriminant as f64).sqrt() as u128;
+        if sqrt_discriminant * sqrt_discriminant != discriminant {
+            continue;
+        }
+
+        // y = (sqrt(discriminant) - 3*d*d) / (6*d)
+        let numerator = sqrt_discriminant - 3 * d * d;
+        if numerator % (6 * d) != 0 {
+            continue;
+        }
+
+        let y = numerator / (6 * d);
+        let x = d + y;
+
+        if !(x > 0 && y > 0) {
+            continue;
+        }
+
+        if x * x * x == N + y * y * y {
+            println!("{} {}", x, y);
+            return;
+        }
+    }
+
+    println!("-1");
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +415,3 @@ where
         r.clone()
     }
 }
-
