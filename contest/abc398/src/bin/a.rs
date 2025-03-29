@@ -33,7 +33,17 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize);
+
+    if N % 2 == 0 {
+        let bar = vec!['-'; N / 2 - 1];
+        println!("{}=={}", bar.iter().join(""), bar.iter().join(""));
+    } else {
+        let bar = vec!['-'; N / 2];
+        println!("{}={}", bar.iter().join(""), bar.iter().join(""));
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +386,3 @@ where
         r.clone()
     }
 }
-

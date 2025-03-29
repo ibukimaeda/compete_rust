@@ -33,7 +33,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, A:[i64;N]);
+
+    let mut number = FxHashMap::default();
+    for i in 0..N {
+        number.entry(A[i]).or_insert(vec![]).push(i as i64);
+    }
+
+    let mut max_num = -1;
+    let mut ans = -1;
+    for (k, v) in number {
+        if v.len() == 1 && max_num < k {
+            max_num = k;
+            ans = v[0] + 1;
+        }
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +394,3 @@ where
         r.clone()
     }
 }
-

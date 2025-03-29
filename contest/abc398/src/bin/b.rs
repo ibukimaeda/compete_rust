@@ -33,7 +33,25 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(A:[i64;7]);
+
+    let mut number = FxHashMap::default();
+    for a in A {
+        *number.entry(a).or_insert(0) += 1;
+    }
+
+    let mut counts = number.iter().map(|(_, &v)| v).collect::<Vec<_>>();
+    counts.sort_by(|a, b| b.cmp(a));
+
+    if counts.len() == 1 {
+        no();
+    } else if counts[0] >= 3 && counts[1] >= 2 {
+        yes();
+    } else {
+        no();
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +394,3 @@ where
         r.clone()
     }
 }
-

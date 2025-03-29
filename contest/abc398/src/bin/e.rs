@@ -33,7 +33,115 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(N:usize, UV:[(Usize1,Usize1);N-1]);
+
+    let mut graph = vec![FxHashSet::default(); N];
+    for (u, v) in UV {
+        graph[u].insert(v);
+        graph[v].insert(u);
+    }
+
+    // ２部グラフを作成
+    // 頂点 0 をルートとして，0 からの距離が偶数の頂点を left に，奇数の頂点を right に分ける
+    let mut left = FxHashSet::default();
+    let mut right = FxHashSet::default();
+
+    // 幅優先探索
+    let mut que = VecDeque::new();
+    que.push_back(0);
+    let mut dist = vec![INF; N];
+    dist[0] = 0;
+    while let Some(u) = que.pop_front() {
+        for &v in &graph[u] {
+            if dist[v] == INF {
+                dist[v] = dist[u] + 1;
+                que.push_back(v);
+            }
+        }
+    }
+
+    for i in 0..N {
+        if dist[i] % 2 == 0 {
+            left.insert(i);
+        } else {
+            right.insert(i);
+        }
+    }
+
+    // 完全２部グラフになるまでに必要な辺の数
+    let mut num_edges_for_complete_bipartite_graph = 0;
+    for &l in &left {
+        num_edges_for_complete_bipartite_graph += right.difference(&graph[l]).count();
+    }
+
+    let mut can_fill_edges = FxHashMap::default();
+    for &l in &left {
+        let edges_to_add = right.difference(&graph[l]).collect::<FxHashSet<_>>();
+        can_fill_edges.insert(l, edges_to_add);
+    }
+
+    if num_edges_for_complete_bipartite_graph % 2 == 0 {
+        // 偶数の場合は，後手が勝つ
+        say("Second");
+        input_interactive!(u:i64, v:i64);
+
+        if u == -1 && v == -1 {
+            return;
+        } else {
+            let mut u = (u - 1) as usize;
+            let mut v = (v - 1) as usize;
+
+            if right.contains(&u) {
+                (u, v) = (v, u);
+            }
+
+            can_fill_edges.get_mut(&u).unwrap().remove(&v);
+
+            if can_fill_edges[&u].is_empty() {
+                can_fill_edges.remove(&u);
+            }
+        }
+    } else {
+        // 奇数の場合は，先手が勝つ
+        say("First");
+    }
+
+    loop {
+        let (&l, rs) = can_fill_edges.iter().next().unwrap();
+        let r = *rs.iter().next().unwrap();
+
+        can_fill_edges.get_mut(&l).unwrap().remove(r);
+        if can_fill_edges[&l].is_empty() {
+            can_fill_edges.remove(&l);
+        }
+
+        if l < *r {
+            println!("{} {}", l + 1, *r + 1);
+        } else {
+            println!("{} {}", *r + 1, l + 1);
+        }
+
+        input_interactive!(u:i64, v:i64);
+
+        if u == -1 && v == -1 {
+            return;
+        } else {
+            let mut u = (u - 1) as usize;
+            let mut v = (v - 1) as usize;
+
+            if right.contains(&u) {
+                (u, v) = (v, u);
+            }
+
+            can_fill_edges.get_mut(&u).unwrap().remove(&v);
+
+            if can_fill_edges[&u].is_empty() {
+                can_fill_edges.remove(&u);
+            }
+        }
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +484,3 @@ where
         r.clone()
     }
 }
-

@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
+use libm::j0;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
 use proconio::{
     fastout, input, input_interactive,
@@ -33,7 +34,41 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, R:i64, C:i64, S:Chars);
+
+    let mut smokes = FxHashSet::default();
+    smokes.insert((0, 0));
+
+    let mut human = (R, C);
+    let mut smoke_generator = (0, 0);
+    let mut ans = vec![];
+    for s in 0..N {
+        let (dx, dy) = match S[s] {
+            'N' => (1, 0),
+            'W' => (0, 1),
+            'S' => (-1, 0),
+            'E' => (0, -1),
+            _ => unreachable!(),
+        };
+
+        human = (human.0 + dx, human.1 + dy);
+
+        if smokes.contains(&(human)) {
+            ans.push('1');
+        } else {
+            ans.push('0');
+        }
+
+        smoke_generator = (smoke_generator.0 + dx, smoke_generator.1 + dy);
+
+        smokes.insert(smoke_generator);
+
+        debug!(smokes);
+    }
+
+    say(ans.iter().join(""));
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +411,3 @@ where
         r.clone()
     }
 }
-
