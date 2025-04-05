@@ -33,7 +33,42 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, S:Chars, T:Chars);
+
+    let mut char_map = HashMap::new();
+    let mut used_chars = HashMap::new();
+
+    for i in 0..N {
+        let s_char = S[i];
+        let t_char = T[i];
+
+        if let Some(&mapped_char) = char_map.get(&s_char) {
+            if mapped_char != t_char {
+                println!("-1");
+                return;
+            }
+        } else {
+            if let Some(&_) = used_chars.get(&t_char) {
+                if *used_chars.get(&t_char).unwrap() && !char_map.values().any(|&v| v == t_char) {
+                    println!("-1");
+                    return;
+                }
+            }
+            char_map.insert(s_char, t_char);
+            used_chars.insert(t_char, true);
+        }
+    }
+
+    let mut operations = 0;
+    for (from, to) in &char_map {
+        if from != to {
+            operations += 1;
+        }
+    }
+
+    println!("{}", operations);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +411,3 @@ where
         r.clone()
     }
 }
-

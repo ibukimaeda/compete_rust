@@ -33,7 +33,30 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, P:[i64; N]);
+
+    let mut P = P.into_iter().enumerate().collect::<Vec<_>>();
+    P.sort_by_key(|x| -x.1);
+
+    let mut rank = vec![0; N];
+
+    let mut r = 1;
+    let mut prev = P[0].1;
+    for i in 0..N {
+        if prev != P[i].1 {
+            r = i + 1;
+            prev = P[i].1;
+        }
+        rank[P[i].0] = r;
+    }
+
+    debug!(P);
+
+    for i in 0..N {
+        say(rank[i]);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +399,3 @@ where
         r.clone()
     }
 }
-

@@ -22,7 +22,7 @@ use std::vec;
 #[allow(dead_code)]
 // const MOD: i64 = 1_000_000_007;
 // const MOD : i64 = 1_000_000_009;
-const MOD: i64 = 998_244_353;
+const MOD: u64 = 998_244_353;
 
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
@@ -32,8 +32,70 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+fn mod_pow(mut base: u64, mut exp: u64) -> u64 {
+    let mut result = 1;
+    base %= MOD;
+    while exp > 0 {
+        if exp & 1 == 1 {
+            result = result * base % MOD;
+        }
+        base = base * base % MOD;
+        exp >>= 1;
+    }
+    result
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, K:usize, A:[u64;N]);
+
+    let mut cumsum = vec![0; N + 1];
+    for i in 0..N {
+        cumsum[i + 1] = (cumsum[i] + A[i]) % MOD;
+    }
+
+    let mut prefix = vec![vec![0u64; N + 1]; K + 1];
+    for exp in 0..=K {
+        prefix[exp][0] = if exp == 0 { 1 } else { 0 };
+        for i in 1..=N {
+            let pow_val = if exp == 0 {
+                1
+            } else {
+                mod_pow(cumsum[i], exp as u64)
+            };
+            prefix[exp][i] = (prefix[exp][i - 1] + pow_val) % MOD;
+        }
+    }
+
+    let mut binom = vec![0u64; K + 1];
+    let mut fact = vec![1u64; K + 1];
+    let mut inv_fact = vec![1u64; K + 1];
+    for i in 1..=K {
+        fact[i] = fact[i - 1] * (i as u64) % MOD;
+    }
+    inv_fact[K] = mod_pow(fact[K], MOD - 2);
+    for i in (0..K).rev() {
+        inv_fact[i] = inv_fact[i + 1] * ((i + 1) as u64) % MOD;
+    }
+    for p in 0..=K {
+        binom[p] = fact[K] * inv_fact[p] % MOD * inv_fact[K - p] % MOD;
+    }
+
+    let mut ans = 0;
+    for p in 0..=K {
+        let sign = if (K - p) % 2 == 0 { 1 } else { MOD - 1 };
+        let mut term = 0;
+        for j in 1..=N {
+            let add = (mod_pow(cumsum[j], p as u64) * prefix[K - p][j - 1]) % MOD;
+            term = (term + add) % MOD;
+        }
+        term = term * binom[p] % MOD;
+        term = term * sign % MOD;
+        ans = (ans + term) % MOD;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +438,3 @@ where
         r.clone()
     }
 }
-

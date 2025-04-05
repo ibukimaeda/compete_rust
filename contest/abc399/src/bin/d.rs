@@ -33,7 +33,48 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(T:usize);
+
+    for _ in 0..T {
+        input_interactive!(N:usize, A:[usize;2*N]);
+
+        let mut already_pair = HashSet::new();
+        for i in 0..2 * N - 1 {
+            if A[i] == A[i + 1] {
+                already_pair.insert(A[i]);
+            }
+        }
+
+        let mut pair = FxHashMap::default();
+        for i in 0..2 * N - 1 {
+            if already_pair.contains(&A[i]) || already_pair.contains(&A[i + 1]) {
+                continue;
+            }
+            pair.entry((A[i], A[i + 1])).or_insert(vec![]).push(i);
+        }
+
+        let mut ans = 0;
+        for i in 0..2 * N - 1 {
+            if let Some(v) = pair.get(&(A[i], A[i + 1])) {
+                for &j in v {
+                    if i + 2 <= j {
+                        ans += 1;
+                    }
+                }
+            }
+
+            if let Some(v) = pair.get(&(A[i + 1], A[i])) {
+                for &j in v {
+                    if i + 2 <= j {
+                        ans += 1;
+                    }
+                }
+            }
+        }
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +417,3 @@ where
         r.clone()
     }
 }
-
