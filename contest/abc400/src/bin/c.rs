@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 use itertools::Itertools;
-use num_integer::{div_ceil, div_floor, gcd, lcm};
+use num_integer::{div_ceil, div_floor, gcd, lcm, Roots};
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
@@ -33,7 +33,38 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:i128);
+
+    // let mut good_num = FxHashSet::default();
+    // for i in 1..=1000 {
+    //     let left = 2_i128.pow(i as u32);
+    //     if left > N {
+    //         break;
+    //     }
+
+    //     let mut j: i128 = 1;
+    //     while left * j.pow(2) <= N {
+    //         good_num.insert(left * j.pow(2));
+    //         j += 1;
+    //     }
+    // }
+
+    // debug!(good_num);
+
+    // say(good_num.len());
+
+    let mut ans = 0;
+    let mut k = 1;
+    while 2_i128.pow(k) <= N {
+        let t = N / 2_i128.pow(k);
+        let m = t.sqrt();
+        ans += (m + 1) / 2;
+        k += 1;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +407,3 @@ where
         r.clone()
     }
 }
-

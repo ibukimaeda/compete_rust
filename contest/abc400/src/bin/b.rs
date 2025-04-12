@@ -33,7 +33,21 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:i128, M:u32);
+
+    let mut X = 0;
+    for i in 0..=M {
+        X += N.pow(i);
+
+        if X > 1000000000 {
+            say("inf");
+            return;
+        }
+    }
+
+    say(X);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +390,3 @@ where
         r.clone()
     }
 }
-

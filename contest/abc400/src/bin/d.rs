@@ -33,7 +33,97 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(H:usize, W:usize, S:[Chars; H], A:Usize1, B:Usize1, C:Usize1, D:Usize1);
+
+    // let mut dist = nested_vec![INF; H; W];
+    // let mut que = VecDeque::new();
+    // que.push_back((A, B));
+    // dist[A][B] = 0;
+    // while let Some((x, y)) = que.pop_front() {
+    //     for i in 0..4 {
+    //         let nx = x as i64 + DX[i];
+    //         let ny = y as i64 + DY[i];
+    //         if nx < 0 || nx >= H as i64 || ny < 0 || ny >= W as i64 {
+    //             continue;
+    //         }
+    //         if dist[nx as usize][ny as usize] != INF {
+    //             continue;
+    //         }
+
+    //         if S[nx as usize][ny as usize] == '#' {
+    //             // 壁ならコスト 1 で 1マス進むか，2マス進む
+    //             dist[nx as usize][ny as usize] = dist[x][y] + 1;
+    //             que.push_back((nx as usize, ny as usize));
+
+    //             let nnx = nx + DX[i];
+    //             let nny = ny + DY[i];
+    //             if nnx < 0 || nnx >= H as i64 || nny < 0 || nny >= W as i64 {
+    //                 continue;
+    //             }
+    //             if dist[nnx as usize][nny as usize] != INF {
+    //                 continue;
+    //             }
+
+    //             dist[nnx as usize][nny as usize] = dist[x][y] + 1;
+    //             que.push_back((nnx as usize, nny as usize));
+
+    //             continue;
+    //         }
+
+    //         // 道があるならコスト 0
+    //         dist[nx as usize][ny as usize] = dist[x][y];
+    //         que.push_back((nx as usize, ny as usize));
+    //     }
+    // }
+
+    // say(dist[C][D]);
+
+    // ダイクストラで解く
+    let mut dist = nested_vec![INF; H; W];
+    let mut que = BinaryHeap::new();
+    que.push((Reverse(0), A, B));
+    dist[A][B] = 0;
+    while let Some((Reverse(d), x, y)) = que.pop() {
+        if dist[x][y] < d {
+            continue;
+        }
+
+        for i in 0..4 {
+            let nx = x as i64 + DX[i];
+            let ny = y as i64 + DY[i];
+            if nx < 0 || nx >= H as i64 || ny < 0 || ny >= W as i64 {
+                continue;
+            }
+
+            if S[nx as usize][ny as usize] == '#' {
+                if d + 1 < dist[nx as usize][ny as usize] {
+                    dist[nx as usize][ny as usize] = d + 1;
+                    que.push((Reverse(d + 1), nx as usize, ny as usize));
+                }
+
+                let nnx = nx + DX[i];
+                let nny = ny + DY[i];
+                if nnx < 0 || nnx >= H as i64 || nny < 0 || nny >= W as i64 {
+                    continue;
+                }
+
+                if d + 1 < dist[nnx as usize][nny as usize] {
+                    dist[nnx as usize][nny as usize] = d + 1;
+                    que.push((Reverse(d + 1), nnx as usize, nny as usize));
+                }
+                continue;
+            }
+
+            if d < dist[nx as usize][ny as usize] {
+                dist[nx as usize][ny as usize] = d;
+                que.push((Reverse(d), nx as usize, ny as usize));
+            }
+        }
+    }
+
+    say(dist[C][D]);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +466,3 @@ where
         r.clone()
     }
 }
-

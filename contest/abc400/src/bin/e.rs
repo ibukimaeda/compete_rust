@@ -32,8 +32,90 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 #[allow(dead_code)]
 const DY: [i64; 4] = [1, -1, 0, 0];
 
+fn sieve(n: usize) -> Vec<i64> {
+    let mut is_prime = vec![true; n + 1];
+    is_prime[0] = false;
+    if n >= 1 {
+        is_prime[1] = false;
+    }
+    for i in 2..=n {
+        if is_prime[i] {
+            let mut j = i * i;
+            while j <= n {
+                is_prime[j] = false;
+                j += i;
+            }
+        }
+    }
+    is_prime
+        .iter()
+        .enumerate()
+        .filter_map(|(i, &prime)| if prime { Some(i as i64) } else { None })
+        .collect()
+}
+
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input! { Q:usize, query: [i64; Q] }
+
+    let primes = sieve(1_000_000);
+
+    let mut prime_powers = Vec::new();
+    for &p in &primes {
+        let mut powers = Vec::new();
+        let mut pa = p;
+        while pa <= 1_000_000 {
+            powers.push(pa);
+            pa = match pa.checked_mul(p) {
+                Some(val) => val,
+                None => break,
+            };
+        }
+        prime_powers.push(powers);
+    }
+
+    let mut four_numbers = Vec::new();
+
+    for i in 0..primes.len() {
+        let p = primes[i];
+        for pa in &prime_powers[i] {
+            let pa_val = *pa;
+            let max_product = 1_000_000 / pa_val;
+            if max_product < 2 {
+                break;
+            }
+            let j_max = primes.partition_point(|&q| q <= max_product);
+            let j_start = i + 1;
+            let j_end = j_max.min(primes.len());
+            for j in j_start..j_end {
+                let q = primes[j];
+                for qb in &prime_powers[j] {
+                    if *qb > max_product {
+                        break;
+                    }
+                    four_numbers.push((pa_val * qb).pow(2));
+                }
+            }
+        }
+    }
+
+    four_numbers.sort_unstable();
+    four_numbers.dedup();
+
+    for A in query {
+        let idx = match four_numbers.binary_search(&A) {
+            Ok(i) => i,
+            Err(i) => {
+                if i == 0 {
+                    0
+                } else {
+                    i - 1
+                }
+            }
+        };
+        println!("{}", four_numbers[idx]);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +458,3 @@ where
         r.clone()
     }
 }
-
