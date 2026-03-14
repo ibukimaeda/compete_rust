@@ -33,7 +33,23 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(H:usize, W:usize, N:usize, A:[[usize; W]; H], B:[usize; N]);
+    let mut ans = 0;
+    for i in 0..H {
+        let mut count = 0;
+        for j in 0..W {
+            for &b in &B {
+                if A[i][j] == b {
+                    count += 1;
+                }
+            }
+        }
+        chmax!(ans, count);
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +392,3 @@ where
         r.clone()
     }
 }
-

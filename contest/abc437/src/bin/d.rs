@@ -22,7 +22,7 @@ use std::vec;
 #[allow(dead_code)]
 // const MOD: i64 = 1_000_000_007;
 // const MOD : i64 = 1_000_000_009;
-const MOD: i64 = 998_244_353;
+const MOD: i128 = 998_244_353;
 
 #[allow(dead_code)]
 const INF: i64 = 1_010_000_000_000_000_017;
@@ -33,7 +33,43 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input!(N:usize, M:usize, mut A:[i128; N], mut B:[i128; M]);
+
+    A.sort_unstable();
+    B.sort_unstable();
+
+    let sum_B = B.iter().sum::<i128>();
+
+    // B のうち「現在の a 以下」の個数 j と、その総和 sum_le
+    let mut j = 0;
+    let mut sum_le = 0;
+
+    let mut ans = 0;
+
+    for &a in &A {
+        while j < M && B[j] <= a {
+            sum_le += B[j];
+            j += 1;
+        }
+
+        let cnt_le = j as i128;
+        let cnt_gt = (M - j) as i128;
+        let sum_gt = sum_B - sum_le;
+
+        // sum_{b<=a} (a-b) + sum_{b>a} (b-a)
+        let s = a * cnt_le - sum_le + (sum_gt - a * cnt_gt);
+
+        ans += s;
+        ans %= MOD;
+    }
+
+    if ans < 0 {
+        ans += MOD;
+    }
+
+    say(ans);
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +412,3 @@ where
         r.clone()
     }
 }
-

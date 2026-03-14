@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 use itertools::Itertools;
 use num_integer::{div_ceil, div_floor, gcd, lcm};
+use pathfinding::matrix::directions::W;
 use proconio::{
     fastout, input, input_interactive,
     marker::{Chars, Isize1, Usize1},
@@ -33,7 +34,36 @@ const DX: [i64; 4] = [0, 0, 1, -1];
 const DY: [i64; 4] = [1, -1, 0, 0];
 
 #[allow(non_snake_case)]
-fn main() {}
+fn main() {
+    input_interactive!(T:usize);
+
+    for _ in 0..T {
+        input_interactive!(N:usize, mut WP:[(i64, i64); N]);
+
+        let mut totalP = 0;
+        let mut costs = vec![];
+
+        for (w, p) in WP {
+            totalP += p;
+            costs.push(w + p);
+        }
+
+        costs.sort();
+
+        let mut sum = 0;
+        let mut ans = 0;
+        for c in costs {
+            if sum + c <= totalP {
+                sum += c;
+                ans += 1;
+            } else {
+                break;
+            }
+        }
+
+        say(ans);
+    }
+}
 
 #[allow(dead_code)]
 fn yes() {
@@ -376,4 +406,3 @@ where
         r.clone()
     }
 }
-
