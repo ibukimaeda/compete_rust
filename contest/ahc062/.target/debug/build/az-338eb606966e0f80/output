@@ -1,6 +1,0 @@
-$ mkdir -p "/home/maeda/work/compete_rust/contest/ahc062/.target/debug/build/az-338eb606966e0f80/out/try_track_caller"
-$ cd "/home/maeda/work/compete_rust/contest/ahc062/.target/debug/build/az-338eb606966e0f80/out/try_track_caller"
-$ printf '%s' "// try_tra"... > "/home/maeda/work/compete_rust/contest/ahc062/.target/debug/build/az-338eb606966e0f80/out/try_track_caller/try_track_caller.rs"
-$ cd "/home/maeda/work/compete_rust/contest/ahc062/.target/debug/build/az-338eb606966e0f80/out/try_track_caller" && "/home/maeda/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc" "try_track_caller.rs" "--emit=dep-info,metadata" >& /dev/null
-cargo:rustc-cfg=track_caller
-$ rm -r "/home/maeda/work/compete_rust/contest/ahc062/.target/debug/build/az-338eb606966e0f80/out/try_track_caller"
