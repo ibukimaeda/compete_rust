@@ -827,7 +827,7 @@ fn is_adjacent(a: Coord, b: Coord, _N: usize) -> bool {
 ///
 /// 入力は盤面サイズ `N` と人口配列 `A`。
 /// 出力は `State` で、row snake / diagonal snake / block snake と
-/// それらの反転を比較したうえで最良のものを保持する。
+/// weighted spiral およびそれらの反転を比較したうえで最良のものを保持する。
 fn build_initial_state(N: usize, A: &[Vec<i64>]) -> State {
     let mut best_path = Vec::new();
     let mut best_score = i64::MIN;
@@ -841,6 +841,12 @@ fn build_initial_state(N: usize, A: &[Vec<i64>]) -> State {
         );
         update_best(
             transformed_diagonal_snake(N, sym),
+            A,
+            &mut best_score,
+            &mut best_path,
+        );
+        update_best(
+            transformed_weighted_spiral(N, sym, A),
             A,
             &mut best_score,
             &mut best_path,
@@ -942,6 +948,122 @@ fn transformed_diagonal_snake(N: usize, sym: usize) -> Vec<Coord> {
         }
     }
     path
+}
+
+/// 重みを見ながら外周から内側へ潜る spiral 経路を作り、対称変換をかけて返す。
+///
+/// 入力は盤面サイズ `N`、対称変換番号 `sym`、人口配列 `A`。
+/// 出力は `Vec<Coord>` で、各 layer の外周をなめたあと 1 マス内側へ入り、
+/// 残った「穴」を後半の日付に回すような初期経路。
+/// 各 ring では 2 通りの巡回方向を比較し、その ring だけのスコアが高い方を採用する。
+fn transformed_weighted_spiral(N: usize, sym: usize, A: &[Vec<i64>]) -> Vec<Coord> {
+    let mut path = Vec::with_capacity(N * N);
+    let mut top = 0_usize;
+    let mut bottom = N - 1;
+    let mut left = 0_usize;
+    let mut right = N - 1;
+
+    while top <= bottom && left <= right {
+        let base_day = path.len() as i64;
+        let ring_a = spiral_ring_right_first(top, bottom, left, right);
+        let ring_b = spiral_ring_down_first(top, bottom, left, right);
+        let score_a = transformed_segment_score(&ring_a, base_day, N, sym, A);
+        let score_b = transformed_segment_score(&ring_b, base_day, N, sym, A);
+        let chosen = if score_a >= score_b { ring_a } else { ring_b };
+        for cell in chosen {
+            path.push(apply_symmetry(N, sym, cell));
+        }
+
+        if top == bottom || left == right {
+            break;
+        }
+        top += 1;
+        bottom -= 1;
+        left += 1;
+        right -= 1;
+    }
+
+    path
+}
+
+/// 現在の ring を「最初に右へ進む」向きでたどる。
+///
+/// 入力は矩形の上下左右境界 `top, bottom, left, right`。
+/// 出力はその ring を 1 度ずつ通る座標列で、最後は左上寄りの位置で止まる。
+/// 次の内側 ring の左上開始点へ自然に接続できる並びになっている。
+fn spiral_ring_right_first(top: usize, bottom: usize, left: usize, right: usize) -> Vec<Coord> {
+    if top == bottom {
+        return (left..=right).map(|j| (top, j)).collect();
+    }
+    if left == right {
+        return (top..=bottom).map(|i| (i, left)).collect();
+    }
+
+    let mut ring = Vec::with_capacity(2 * (bottom - top + right - left));
+    for j in left..=right {
+        ring.push((top, j));
+    }
+    for i in top + 1..=bottom {
+        ring.push((i, right));
+    }
+    for j in (left..right).rev() {
+        ring.push((bottom, j));
+    }
+    for i in (top + 1..bottom).rev() {
+        ring.push((i, left));
+    }
+    ring
+}
+
+/// 現在の ring を「最初に下へ進む」向きでたどる。
+///
+/// 入力は矩形の上下左右境界 `top, bottom, left, right`。
+/// 出力はその ring を 1 度ずつ通る座標列で、最後は左上寄りの位置で止まる。
+/// `spiral_ring_right_first` と同じ内側開始点へ繋がる別順序の候補として使う。
+fn spiral_ring_down_first(top: usize, bottom: usize, left: usize, right: usize) -> Vec<Coord> {
+    if top == bottom {
+        return (left..=right).map(|j| (top, j)).collect();
+    }
+    if left == right {
+        return (top..=bottom).map(|i| (i, left)).collect();
+    }
+
+    let mut ring = Vec::with_capacity(2 * (bottom - top + right - left));
+    for i in top..=bottom {
+        ring.push((i, left));
+    }
+    for j in left + 1..=right {
+        ring.push((bottom, j));
+    }
+    for i in (top..bottom).rev() {
+        ring.push((i, right));
+    }
+    for j in (left + 1..right).rev() {
+        ring.push((top, j));
+    }
+    ring
+}
+
+/// ある座標列へ対称変換をかけたときの区間スコアを計算する。
+///
+/// 入力は canonical 座標列 `segment`、その先頭が対応する日 `base_day`、
+/// 盤面サイズ `N`、対称変換番号 `sym`、人口配列 `A`。
+/// 出力は `i64` で、その順序を採用したときの区間寄与スコア。
+fn transformed_segment_score(
+    segment: &[Coord],
+    base_day: i64,
+    N: usize,
+    sym: usize,
+    A: &[Vec<i64>],
+) -> i64 {
+    segment
+        .iter()
+        .enumerate()
+        .map(|(offset, &cell)| {
+            let (i, j) = apply_symmetry(N, sym, cell);
+            (base_day + offset as i64) * A[i][j]
+        })
+        .sum()
 }
 
 /// 2x2 ブロック単位で蛇行しつつ、各ブロック内部の順序も最適化して返す。
