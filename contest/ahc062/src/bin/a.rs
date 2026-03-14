@@ -20,6 +20,9 @@ const TOTAL_TIME_LIMIT_SEC: f64 = 2.8;
 /// 全体時間のうち、ブロック順最適化へ優先的に割り当てる割合。
 /// 大域的な順序改善を先に行い、その後のセル単位探索へ残り時間を渡す。
 const BLOCK_STAGE_RATIO: f64 = 0.3;
+/// 複数初期解を見比べるための probe 探索に割り当てる割合。
+/// 短時間ずつ試して一番伸びる系列を選び、残り時間をその 1 本へ集中させる。
+const PROBE_STAGE_RATIO: f64 = 0.15;
 /// 焼きなまし開始時の温度。
 /// 悪化手でも受理しやすくして、探索の初期に広く状態を動かすために使う。
 const START_TEMP: f64 = 2_000_000.0;
@@ -119,9 +122,10 @@ impl State {
 ///
 /// 入力は標準入力からの `N` と人口配列 `A`。
 /// 出力は `N^2` 行の座標列で、各行が「その日に訪問するマス」を表す。
-/// まずセル直列の初期解と 2x2 ブロック単位の大域的初期解を作り、
-/// 後者をセル経路へ復元したものも候補に加えたうえで、
-/// 最後にセル単位の局所探索で改善して最良経路を出力する。
+/// 初期解は baseline 系と weighted spiral 系を明示的に別系列で作り、
+/// さらに 2x2 ブロック単位でも同様の別系列初期解を作ってセル経路へ戻す。
+/// それらを短時間ずつ probe 探索して有望な 1 本を選び、
+/// 最後に残り時間をその 1 本へ集中させて最良経路を出力する。
 fn main() {
     input! {
         N: usize,
@@ -130,37 +134,70 @@ fn main() {
 
     let start = Instant::now();
     let weights = flatten_weights(&A);
-    let mut best_initial = build_initial_state(N, &A);
+    let mut initial_candidates = vec![build_baseline_state(N, &A), build_spiral_state(N, &A)];
 
     if N % 2 == 0 {
         let block_weight_matrix = build_block_weight_matrix(&A);
         let block_weights = flatten_weights(&block_weight_matrix);
         let block_size = N / 2;
-        let block_initial = build_initial_state(block_size, &block_weight_matrix);
         let block_stage_limit = TOTAL_TIME_LIMIT_SEC * BLOCK_STAGE_RATIO;
         let block_stage_budget = (block_stage_limit - start.elapsed().as_secs_f64()).max(0.0);
-        let block_path = if block_stage_budget > 0.0 {
-            anneal(
-                block_initial,
-                block_size,
-                &block_weights,
-                block_stage_budget,
-            )
+        let block_initials = vec![
+            build_baseline_state(block_size, &block_weight_matrix),
+            build_spiral_state(block_size, &block_weight_matrix),
+        ];
+        let per_block_budget = if block_stage_budget > 0.0 {
+            block_stage_budget / block_initials.len() as f64
         } else {
-            block_initial.path
+            0.0
         };
-        let expanded_path = expand_block_path(&block_path, &A);
-        let expanded_score = calc_score(&expanded_path, &A);
-        if expanded_score > best_initial.score {
-            best_initial = State::new(expanded_path, expanded_score, N);
+
+        for block_initial in block_initials {
+            let block_path = if per_block_budget > 0.0 {
+                anneal(block_initial, block_size, &block_weights, per_block_budget)
+            } else {
+                block_initial.path
+            };
+            let expanded_path = expand_block_path(&block_path, &A);
+            let expanded_score = calc_score(&expanded_path, &A);
+            initial_candidates.push(State::new(expanded_path, expanded_score, N));
         }
     }
 
     let remaining = (TOTAL_TIME_LIMIT_SEC - start.elapsed().as_secs_f64()).max(0.0);
+    initial_candidates.sort_by_key(|state| state.score);
+    initial_candidates.reverse();
+    initial_candidates.truncate(4);
+
     let best_path = if remaining > 0.0 {
-        anneal(best_initial, N, &weights, remaining)
+        let probe_total_budget = remaining * PROBE_STAGE_RATIO;
+        let per_candidate_probe_budget = if probe_total_budget > 0.0 {
+            probe_total_budget / initial_candidates.len() as f64
+        } else {
+            0.0
+        };
+
+        let mut best_probe_state = initial_candidates[0].clone();
+        for initial in initial_candidates {
+            let candidate_path = if per_candidate_probe_budget > 0.0 {
+                anneal(initial, N, &weights, per_candidate_probe_budget)
+            } else {
+                initial.path
+            };
+            let candidate_score = calc_score_from_weights(&candidate_path, N, &weights);
+            if candidate_score > best_probe_state.score {
+                best_probe_state = State::new(candidate_path, candidate_score, N);
+            }
+        }
+
+        let final_budget = remaining - probe_total_budget;
+        if final_budget > 0.0 {
+            anneal(best_probe_state, N, &weights, final_budget)
+        } else {
+            best_probe_state.path
+        }
     } else {
-        best_initial.path
+        initial_candidates[0].path.clone()
     };
 
     for (i, j) in best_path {
@@ -823,12 +860,12 @@ fn is_adjacent(a: Coord, b: Coord, _N: usize) -> bool {
     (di != 0 || dj != 0) && di <= 1 && dj <= 1
 }
 
-/// 手作りのベースライン候補群から初期解を組み立てる。
+/// 手作りの baseline 候補群から初期解を組み立てる。
 ///
 /// 入力は盤面サイズ `N` と人口配列 `A`。
 /// 出力は `State` で、row snake / diagonal snake / block snake と
-/// weighted spiral およびそれらの反転を比較したうえで最良のものを保持する。
-fn build_initial_state(N: usize, A: &[Vec<i64>]) -> State {
+/// それらの反転を比較したうえで最良のものを保持する。
+fn build_baseline_state(N: usize, A: &[Vec<i64>]) -> State {
     let mut best_path = Vec::new();
     let mut best_score = i64::MIN;
 
@@ -845,12 +882,6 @@ fn build_initial_state(N: usize, A: &[Vec<i64>]) -> State {
             &mut best_score,
             &mut best_path,
         );
-        update_best(
-            transformed_weighted_spiral(N, sym, A),
-            A,
-            &mut best_score,
-            &mut best_path,
-        );
 
         if N % 2 == 0 {
             update_best(
@@ -860,6 +891,27 @@ fn build_initial_state(N: usize, A: &[Vec<i64>]) -> State {
                 &mut best_path,
             );
         }
+    }
+
+    State::new(best_path, best_score, N)
+}
+
+/// weighted spiral 候補群から初期解を組み立てる。
+///
+/// 入力は盤面サイズ `N` と人口配列 `A`。
+/// 出力は `State` で、8 通りの対称変換をかけた weighted spiral と
+/// その反転を比較したうえで最良のものを保持する。
+fn build_spiral_state(N: usize, A: &[Vec<i64>]) -> State {
+    let mut best_path = Vec::new();
+    let mut best_score = i64::MIN;
+
+    for sym in 0..8 {
+        update_best(
+            transformed_weighted_spiral(N, sym, A),
+            A,
+            &mut best_score,
+            &mut best_path,
+        );
     }
 
     State::new(best_path, best_score, N)
@@ -891,6 +943,17 @@ fn calc_score(path: &[Coord], A: &[Vec<i64>]) -> i64 {
     path.iter()
         .enumerate()
         .map(|(day, &(i, j))| day as i64 * A[i][j])
+        .sum()
+}
+
+/// 完全な経路 1 本の総スコアを 1 次元重み配列から計算する。
+///
+/// 入力は訪問順 `path`、盤面サイズ `N`、行優先の人口配列 `weights`。
+/// 出力は `sum(day * weight[cell])` の値で、multi-start 後の比較に使う。
+fn calc_score_from_weights(path: &[Coord], N: usize, weights: &[i64]) -> i64 {
+    path.iter()
+        .enumerate()
+        .map(|(day, &cell)| day as i64 * cell_weight(cell, N, weights))
         .sum()
 }
 
