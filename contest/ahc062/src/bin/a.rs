@@ -14,9 +14,12 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 type Coord = (usize, usize);
 
-/// 焼きなまし本体に使う制限時間。
-/// 秒単位で指定し、この時間を超えたら探索を打ち切る。
-const TIME_LIMIT_SEC: f64 = 2.8;
+/// 解全体で使う制限時間。
+/// 秒単位で指定し、ブロック段階とセル段階の探索をこの中で配分する。
+const TOTAL_TIME_LIMIT_SEC: f64 = 2.8;
+/// 全体時間のうち、ブロック順最適化へ優先的に割り当てる割合。
+/// 大域的な順序改善を先に行い、その後のセル単位探索へ残り時間を渡す。
+const BLOCK_STAGE_RATIO: f64 = 0.3;
 /// 焼きなまし開始時の温度。
 /// 悪化手でも受理しやすくして、探索の初期に広く状態を動かすために使う。
 const START_TEMP: f64 = 2_000_000.0;
@@ -116,16 +119,49 @@ impl State {
 ///
 /// 入力は標準入力からの `N` と人口配列 `A`。
 /// 出力は `N^2` 行の座標列で、各行が「その日に訪問するマス」を表す。
-/// 初期解を作ってから局所探索で改善し、最後に最良経路を出力する。
+/// まずセル直列の初期解と 2x2 ブロック単位の大域的初期解を作り、
+/// 後者をセル経路へ復元したものも候補に加えたうえで、
+/// 最後にセル単位の局所探索で改善して最良経路を出力する。
 fn main() {
     input! {
         N: usize,
         A: [[i64; N]; N],
     }
 
+    let start = Instant::now();
     let weights = flatten_weights(&A);
-    let initial = build_initial_state(N, &A);
-    let best_path = anneal(initial, N, &weights, TIME_LIMIT_SEC);
+    let mut best_initial = build_initial_state(N, &A);
+
+    if N % 2 == 0 {
+        let block_weight_matrix = build_block_weight_matrix(&A);
+        let block_weights = flatten_weights(&block_weight_matrix);
+        let block_size = N / 2;
+        let block_initial = build_initial_state(block_size, &block_weight_matrix);
+        let block_stage_limit = TOTAL_TIME_LIMIT_SEC * BLOCK_STAGE_RATIO;
+        let block_stage_budget = (block_stage_limit - start.elapsed().as_secs_f64()).max(0.0);
+        let block_path = if block_stage_budget > 0.0 {
+            anneal(
+                block_initial,
+                block_size,
+                &block_weights,
+                block_stage_budget,
+            )
+        } else {
+            block_initial.path
+        };
+        let expanded_path = expand_block_path(&block_path, &A);
+        let expanded_score = calc_score(&expanded_path, &A);
+        if expanded_score > best_initial.score {
+            best_initial = State::new(expanded_path, expanded_score, N);
+        }
+    }
+
+    let remaining = (TOTAL_TIME_LIMIT_SEC - start.elapsed().as_secs_f64()).max(0.0);
+    let best_path = if remaining > 0.0 {
+        anneal(best_initial, N, &weights, remaining)
+    } else {
+        best_initial.path
+    };
 
     for (i, j) in best_path {
         println!("{i} {j}");
@@ -605,6 +641,176 @@ fn cell_weight(cell: Coord, N: usize, weights: &[i64]) -> i64 {
 /// 出力は `weights[i * N + j]` で参照できる 1 次元ベクタ。
 fn flatten_weights(A: &[Vec<i64>]) -> Vec<i64> {
     A.iter().flat_map(|row| row.iter().copied()).collect()
+}
+
+/// 元のセル人口配列から、2x2 ブロックごとの人口和を作る。
+///
+/// 入力はセル単位の人口配列 `A`。
+/// 出力は `N/2 x N/2` の配列で、各要素が対応する 2x2 ブロックの人口和になる。
+/// ブロック順の大域探索ではこの和を重みとして用いる。
+fn build_block_weight_matrix(A: &[Vec<i64>]) -> Vec<Vec<i64>> {
+    let N = A.len();
+    let B = N / 2;
+    let mut block_weights = vec![vec![0_i64; B]; B];
+    for bi in 0..B {
+        for bj in 0..B {
+            let cells = block_cells((bi, bj));
+            block_weights[bi][bj] = cells.iter().map(|&(i, j)| A[i][j]).sum();
+        }
+    }
+    block_weights
+}
+
+/// ブロック順を受け取り、それに一致するセル順の経路へ厳密に展開する。
+///
+/// 入力は 2x2 ブロック単位の訪問順 `block_path` とセル人口配列 `A`。
+/// 出力は `Vec<Coord>` で、各ブロックを 4 連続日で訪問する具体的なセル経路。
+/// 各ブロック内の開始セル・終了セルは、前後ブロックとの接続を守る範囲で
+/// 動的計画法により最良の組合せを選ぶ。
+fn expand_block_path(block_path: &[Coord], A: &[Vec<i64>]) -> Vec<Coord> {
+    let block_count = block_path.len();
+    let neg_inf = i64::MIN / 4;
+    let block_cells_list: Vec<_> = block_path.iter().copied().map(block_cells).collect();
+    let mut dp = vec![neg_inf; block_count * 4];
+    let mut parent_exit = vec![usize::MAX; block_count * 4];
+    let mut chosen_start = vec![usize::MAX; block_count * 4];
+
+    for end_idx in 0..4 {
+        for start_idx in 0..4 {
+            if start_idx == end_idx {
+                continue;
+            }
+            let score = block_order_score(&block_cells_list[0], start_idx, end_idx, 0, A);
+            let pos = end_idx;
+            if score > dp[pos] {
+                dp[pos] = score;
+                chosen_start[pos] = start_idx;
+            }
+        }
+    }
+
+    for block_idx in 1..block_count {
+        let mut next_dp = vec![neg_inf; 4];
+        let current_cells = &block_cells_list[block_idx];
+        let prev_cells = &block_cells_list[block_idx - 1];
+        let base_day = (4 * block_idx) as i64;
+
+        for prev_end_idx in 0..4 {
+            let prev_score = dp[(block_idx - 1) * 4 + prev_end_idx];
+            if prev_score == neg_inf {
+                continue;
+            }
+            let prev_exit_cell = prev_cells[prev_end_idx];
+            for end_idx in 0..4 {
+                for start_idx in 0..4 {
+                    if start_idx == end_idx {
+                        continue;
+                    }
+                    let start_cell = current_cells[start_idx];
+                    if !is_adjacent(prev_exit_cell, start_cell, A.len()) {
+                        continue;
+                    }
+                    let cand = prev_score
+                        + block_order_score(current_cells, start_idx, end_idx, base_day, A);
+                    if cand > next_dp[end_idx] {
+                        next_dp[end_idx] = cand;
+                        let pos = block_idx * 4 + end_idx;
+                        parent_exit[pos] = prev_end_idx;
+                        chosen_start[pos] = start_idx;
+                    }
+                }
+            }
+        }
+
+        for end_idx in 0..4 {
+            dp[block_idx * 4 + end_idx] = next_dp[end_idx];
+        }
+    }
+
+    let mut best_end_idx = 0;
+    let mut best_score = neg_inf;
+    for end_idx in 0..4 {
+        let score = dp[(block_count - 1) * 4 + end_idx];
+        if score > best_score {
+            best_score = score;
+            best_end_idx = end_idx;
+        }
+    }
+
+    let mut start_indices = vec![0_usize; block_count];
+    let mut end_indices = vec![0_usize; block_count];
+    let mut current_end = best_end_idx;
+    for block_idx in (0..block_count).rev() {
+        let pos = block_idx * 4 + current_end;
+        start_indices[block_idx] = chosen_start[pos];
+        end_indices[block_idx] = current_end;
+        if block_idx > 0 {
+            current_end = parent_exit[pos];
+        }
+    }
+
+    let mut path = Vec::with_capacity(block_count * 4);
+    for block_idx in 0..block_count {
+        let order = block_order_from_endpoints(
+            &block_cells_list[block_idx],
+            start_indices[block_idx],
+            end_indices[block_idx],
+            A,
+        );
+        path.extend(order);
+    }
+    path
+}
+
+/// 1 つの 2x2 ブロックについて、開始セルと終了セルを固定した最良順序を返す。
+///
+/// 入力はブロック内 4 マス `cells`、開始セル index `start_idx`、終了セル index `end_idx`、
+/// そして人口配列 `A`。
+/// 出力は長さ 4 の配列で、最初が開始セル、最後が終了セルとなる最良順序。
+/// 中間 2 マスは「軽い方を先、重い方を後」に置く。
+fn block_order_from_endpoints(
+    cells: &[Coord; 4],
+    start_idx: usize,
+    end_idx: usize,
+    A: &[Vec<i64>],
+) -> [Coord; 4] {
+    let mut middle = [usize::MAX; 2];
+    let mut count = 0;
+    for idx in 0..4 {
+        if idx != start_idx && idx != end_idx {
+            middle[count] = idx;
+            count += 1;
+        }
+    }
+    if A[cells[middle[0]].0][cells[middle[0]].1] > A[cells[middle[1]].0][cells[middle[1]].1] {
+        middle.swap(0, 1);
+    }
+    [
+        cells[start_idx],
+        cells[middle[0]],
+        cells[middle[1]],
+        cells[end_idx],
+    ]
+}
+
+/// 開始セル・終了セルを固定した 1 ブロック分の寄与スコアを計算する。
+///
+/// 入力はブロック内 4 マス `cells`、開始セル index `start_idx`、終了セル index `end_idx`、
+/// ブロック左端に対応する日 `base_day`、人口配列 `A`。
+/// 出力は `i64` で、その 4 日分のスコア寄与を返す。
+fn block_order_score(
+    cells: &[Coord; 4],
+    start_idx: usize,
+    end_idx: usize,
+    base_day: i64,
+    A: &[Vec<i64>],
+) -> i64 {
+    let order = block_order_from_endpoints(cells, start_idx, end_idx, A);
+    order
+        .iter()
+        .enumerate()
+        .map(|(offset, &(i, j))| (base_day + offset as i64) * A[i][j])
+        .sum()
 }
 
 /// 2 つのマスが king move で隣接しているかを判定する。
